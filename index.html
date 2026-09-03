@@ -1,901 +1,1911 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nora Peñaloza Friqui — Field Log</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0A0D12;
-    --bg-panel:#12161D;
-    --bg-panel-2:#171C24;
-    --bg-raised:#1C222B;
-    --line:#232A33;
-    --line-soft:#1A2029;
-    --text:#E7ECF2;
-    --text-dim:#8B96A3;
-    --text-faint:#5B6570;
-    --accent:#F2B33D;
-    --accent-dim:#B08A3E;
-    --accent-soft:rgba(242,179,61,0.12);
-    --ok:#4ADE80;
-    --ok-soft:rgba(74,222,128,0.12);
-    --dev:#5EEAD4;
-    --dev-soft:rgba(94,234,212,0.12);
-    --arch:#8B96A3;
-    --arch-soft:rgba(139,150,163,0.12);
-    --font-display:'VT323', monospace;
-    --font-title:'Press Start 2P', var(--font-mono);
-    --font-mono:'JetBrains Mono', monospace;
-    --radius:0px;
-    --maxw:1180px;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font-display);
-    font-size:19px;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    image-rendering:pixelated;
-    background-image:
-      linear-gradient(var(--line-soft) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
-    background-size:32px 32px;
-    background-position:-1px -1px;
-    overflow-x:hidden;
-    position:relative;
-  }
-  body::after{
-    content:"";
-    position:fixed; inset:0; pointer-events:none; z-index:9998;
-    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, transparent 1px, transparent 3px);
-    mix-blend-mode:multiply;
-    opacity:0.5;
-  }
-  @media(max-width:700px){ body::after{ opacity:0.28; } }
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
-  }
-  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
-  a{color:inherit;}
-  ::selection{background:var(--accent); color:#0A0D12;}
-  body.has-cursor, body.has-cursor a, body.has-cursor button{cursor:none;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nora Peñaloza Friqui — Field Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0D12;
+      --bg-panel: #12161D;
+      --bg-panel-2: #171C24;
+      --bg-raised: #1C222B;
+      --line: #232A33;
+      --line-soft: #1A2029;
+      --text: #E7ECF2;
+      --text-dim: #8B96A3;
+      --text-faint: #5B6570;
+      --accent: #F2B33D;
+      --accent-dim: #B08A3E;
+      --accent-soft: rgba(242, 179, 61, 0.12);
+      --ok: #4ADE80;
+      --ok-soft: rgba(74, 222, 128, 0.12);
+      --dev: #5EEAD4;
+      --dev-soft: rgba(94, 234, 212, 0.12);
+      --arch: #8B96A3;
+      --arch-soft: rgba(139, 150, 163, 0.12);
+      --font-display: 'VT323', monospace;
+      --font-title: 'Press Start 2P', var(--font-mono);
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 0px;
+      --maxw: 1180px;
+    }
 
-  /* ---------- custom cursor ---------- */
-  #cursorDot, #cursorRing{
-    position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
-    transform:translate(-50%,-50%) rotate(45deg);
-  }
-  #cursorDot{width:6px; height:6px; background:var(--accent);}
-  #cursorRing{
-    width:22px; height:22px; border:2px solid var(--accent-dim);
-    transition:width .12s steps(3), height .12s steps(3), border-color .12s, opacity .12s;
-    opacity:0.8;
-  }
-  #cursorRing.ring-hover{width:38px; height:38px; border-color:var(--accent); opacity:1;}
-  @media(max-width:900px), (hover:none){ #cursorDot, #cursorRing{display:none;} body.has-cursor, body.has-cursor a, body.has-cursor button{cursor:auto;} }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* ---------- boot overlay ---------- */
-  #boot{
-    position:fixed; inset:0; background:#05070A; z-index:500;
-    font-family:var(--font-mono); color:var(--ok); font-size:13px;
-    padding:32px; display:flex; flex-direction:column; justify-content:flex-end;
-    transition:opacity .5s ease, visibility .5s;
-  }
-  #boot.hidden{opacity:0; visibility:hidden; pointer-events:none;}
-  #bootLines{max-width:640px; margin:0 auto; width:100%;}
-  #bootLines div{opacity:0; margin-bottom:5px; white-space:pre-wrap;}
-  #bootLines div.show{opacity:1;}
-  #bootLines .ok-tag{color:var(--ok);}
-  #bootLines .dim-tag{color:var(--text-faint);}
-  #bootSkip{
-    position:absolute; top:24px; right:28px; font-family:var(--font-mono); font-size:11px;
-    color:var(--text-faint); background:none; border:1px solid var(--line); padding:7px 12px;
-    border-radius:var(--radius); cursor:pointer;
-  }
-  #bootSkip:hover{color:var(--accent); border-color:var(--accent);}
+    html {
+      scroll-behavior: smooth;
+    }
 
-  /* ---------- Top bar ---------- */
-  .topbar{
-    position:sticky; top:0; z-index:40;
-    background:var(--bg);
-    border-bottom:2px solid var(--line);
-  }
-  .topbar-inner{
-    max-width:var(--maxw); margin:0 auto; padding:14px 28px;
-    display:flex; align-items:center; justify-content:space-between; gap:16px;
-  }
-  .brand{
-    font-family:var(--font-mono); font-size:13px; letter-spacing:0.03em;
-    color:var(--text); display:flex; align-items:center; gap:9px; white-space:nowrap;
-  }
-  .brand .dot{
-    width:8px; height:8px; background:var(--ok);
-    box-shadow:0 0 0 3px var(--ok-soft);
-    animation:pulse 2.4s steps(2) infinite;
-    flex:none;
-  }
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
-  .nav{display:none; gap:26px; font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.06em;}
-  .nav a{color:var(--text-dim); text-decoration:none; text-transform:uppercase; transition:color .15s;}
-  .nav a:hover{color:var(--accent);}
-  @media(min-width:860px){.nav{display:flex;}}
-  .clock{font-family:var(--font-mono); font-size:11.5px; color:var(--text-faint); display:none; white-space:nowrap;}
-  @media(min-width:860px){.clock{display:block;}}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 19px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      image-rendering: pixelated;
+      background-image:
+        linear-gradient(var(--line-soft) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+      background-size: 32px 32px;
+      background-position: -1px -1px;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-  /* ---------- Buttons ---------- */
-  .btn{
-    display:inline-flex; align-items:center; gap:8px;
-    font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.05em; text-transform:uppercase;
-    padding:11px 18px; text-decoration:none; cursor:pointer;
-    border:2px solid var(--line); background:var(--bg-panel); color:var(--text);
-    box-shadow:4px 4px 0 0 var(--line);
-    transition:box-shadow .1s steps(2), transform .1s steps(2), border-color .1s, color .1s;
-  }
-  .btn:hover{border-color:var(--accent); color:var(--accent);}
-  .btn:active{transform:translate(3px,3px); box-shadow:1px 1px 0 0 var(--line);}
-  .btn-solid{background:var(--accent); border-color:#5c4310; color:#14100A; font-weight:600; box-shadow:4px 4px 0 0 #5c4310;}
-  .btn-solid:hover{background:#ffcb5c; border-color:#5c4310; color:#14100A;}
-  .btn-solid:active{box-shadow:1px 1px 0 0 #5c4310;}
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0px, rgba(0, 0, 0, 0.22) 1px, transparent 1px, transparent 3px);
+      mix-blend-mode: multiply;
+      opacity: 0.5;
+    }
 
-  /* ---------- reveal-on-scroll ---------- */
-  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
-  .reveal.in{opacity:1; transform:translateY(0);}
+    @media(max-width:700px) {
+      body::after {
+        opacity: 0.28;
+      }
+    }
 
-  /* ---------- Hero ---------- */
-  .hero{padding:80px 0 56px; position:relative;}
-  .eyebrow{
-    font-family:var(--font-mono); font-size:12px; letter-spacing:0.14em; text-transform:uppercase;
-    color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:22px;
-  }
-  .eyebrow::before{content:'//'; color:var(--text-faint);}
-  h1.name{
-    font-family:var(--font-title);
-    font-size:clamp(22px, 4.6vw, 42px); font-weight:400; letter-spacing:0; line-height:1.5;
-    text-transform:uppercase;
-  }
-  .role-line{
-    font-family:var(--font-mono); font-size:clamp(13px,2vw,16px); color:var(--accent);
-    margin-top:14px; letter-spacing:0.02em; min-height:1.4em;
-  }
-  .role-line .cur{display:inline-block; width:8px; background:var(--accent); animation:blink 1s step-start infinite; margin-left:2px;}
-  @keyframes blink{50%{opacity:0;}}
-  .summary{
-    max-width:640px; color:var(--text-dim); font-size:20px; margin-top:22px;
-  }
-  .status-line{
-    font-family:var(--font-mono); font-size:12px; color:var(--text-faint); margin-top:18px;
-    display:flex; align-items:center; gap:8px;
-  }
-  .status-line .dot2{width:6px; height:6px; background:var(--ok); box-shadow:0 0 0 3px var(--ok-soft); flex:none;}
-  .contact-row{
-    display:flex; flex-wrap:wrap; gap:10px; margin-top:26px;
-  }
-  .tag-link{
-    font-family:var(--font-mono); font-size:12.5px; color:var(--text-dim);
-    border:1px solid var(--line); border-radius:var(--radius); padding:8px 12px;
-    text-decoration:none; display:inline-flex; align-items:center; gap:6px;
-    transition:border-color .15s, color .15s, transform .15s;
-  }
-  .tag-link:hover{border-color:var(--accent); color:var(--accent); transform:translateY(-1px);}
-  .hero-cta{display:flex; flex-wrap:wrap; gap:12px; margin-top:34px;}
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
 
-  /* ---------- Section shell ---------- */
-  section{padding:60px 0;}
-  .section-head{margin-bottom:32px;}
-  .section-tag{
-    font-family:var(--font-mono); font-size:12px; letter-spacing:0.14em; text-transform:uppercase;
-    color:var(--text-faint); margin-bottom:10px; min-height:1.4em;
-  }
-  .section-title{font-family:var(--font-title); font-size:clamp(15px,2vw,20px); font-weight:400; text-transform:uppercase; letter-spacing:0; line-height:1.6;}
-  .divider{height:1px; background:var(--line); border:none; margin:0;}
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
-  /* ---------- Mission stats ---------- */
-  .stats-bar{
-    display:grid; grid-template-columns:repeat(2,1fr); gap:2px;
-    background:var(--line); border:2px solid var(--line);
-    overflow:hidden; margin-bottom:36px;
-  }
-  @media(min-width:640px){.stats-bar{grid-template-columns:repeat(4,1fr);}}
-  .stat{background:var(--bg-panel); padding:22px 20px;}
-  .stat-num{font-family:var(--font-title); font-size:26px; font-weight:400; color:var(--text);}
-  .stat.is-ok .stat-num{color:var(--ok);}
-  .stat.is-dev .stat-num{color:var(--dev);}
-  .stat.is-arch .stat-num{color:var(--arch);}
-  .stat-label{font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); margin-top:6px;}
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 28px;
+    }
 
-  /* ---------- Terminal ---------- */
-  .terminal{
-    background:#05070A; border:2px solid var(--line); margin-bottom:32px;
-    font-family:var(--font-mono); overflow:hidden;
-  }
-  .terminal-bar{
-    display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--bg-raised);
-    border-bottom:1px solid var(--line);
-  }
-  .terminal-dots{display:flex; gap:6px;}
-  .terminal-dots span{width:9px; height:9px; background:#3A424D;}
-  .terminal-title{font-size:11px; color:var(--text-faint); letter-spacing:0.04em; margin-left:4px;}
-  .terminal-hint{margin-left:auto; font-size:10.5px; color:var(--text-faint);}
-  .terminal-hint kbd{border:1px solid var(--line); border-radius:3px; padding:1px 5px; font-family:var(--font-mono);}
-  #termOutput{
-    max-height:220px; overflow-y:auto; padding:14px 16px; font-size:12.5px; color:var(--text-dim); line-height:1.7;
-  }
-  #termOutput .line{white-space:pre-wrap;}
-  #termOutput .prompt-echo{color:var(--text);}
-  #termOutput .prompt-echo::before{content:'$ '; color:var(--accent);}
-  #termOutput .err{color:#F87171;}
-  #termOutput .ok-line{color:var(--ok);}
-  #termOutput .accent-line{color:var(--accent);}
-  .terminal-input-row{
-    display:flex; align-items:center; gap:8px; padding:12px 16px; border-top:1px solid var(--line);
-  }
-  .terminal-prompt{color:var(--accent); font-size:13px;}
-  #termInput{
-    flex:1; background:transparent; border:none; outline:none; color:var(--text);
-    font-family:var(--font-mono); font-size:13px;
-  }
-  #termInput::placeholder{color:var(--text-faint);}
+    a {
+      color: inherit;
+    }
 
-  /* ---------- Filters ---------- */
-  .filters{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px;}
-  .filter-btn{
-    font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase;
-    padding:8px 14px; border:2px solid var(--line); background:transparent;
-    color:var(--text-dim); cursor:pointer; transition:all .1s steps(2);
-  }
-  .filter-btn:hover{border-color:var(--accent); color:var(--accent);}
-  .filter-btn.active{background:var(--accent); border-color:var(--accent); color:#14100A; font-weight:600;}
+    ::selection {
+      background: var(--accent);
+      color: #0A0D12;
+    }
 
-  /* ---------- Bento mission grid ---------- */
-  .mission-grid{
-    display:grid; grid-template-columns:1fr; gap:14px;
-  }
-  @media(min-width:720px){
-    .mission-grid{grid-template-columns:repeat(4,1fr); grid-auto-rows:minmax(180px,auto);}
-    .mission-card.size-lg{grid-column:span 2; grid-row:span 2;}
-    .mission-card.size-md{grid-column:span 2; grid-row:span 1;}
-    .mission-card.size-sm{grid-column:span 2; grid-row:span 1;}
-  }
-  @media(min-width:1000px){
-    .mission-card.size-sm{grid-column:span 1;}
-  }
-  .mission-card{
-    background:var(--bg-panel); border:2px solid var(--line);
-    padding:22px; cursor:pointer; transition:border-color .1s, background .1s, box-shadow .1s;
-    display:flex; flex-direction:column; gap:14px; will-change:transform; position:relative;
-    transform-style:preserve-3d; min-width:0; overflow:hidden;
-  }
-  .mission-card:hover{border-color:var(--accent); background:var(--bg-panel-2); box-shadow:6px 6px 0 0 var(--accent-dim); transform:translate(-3px,-3px);}
-  .mission-card::before, .mission-card::after{
-    content:""; position:absolute; width:16px; height:16px; pointer-events:none; opacity:0; transition:opacity .12s;
-  }
-  .mission-card::before{ top:-2px; left:-2px; border-top:3px solid var(--accent); border-left:3px solid var(--accent); }
-  .mission-card::after{ bottom:-2px; right:-2px; border-bottom:3px solid var(--accent); border-right:3px solid var(--accent); }
-  .mission-card:hover::before, .mission-card:hover::after{ opacity:1; }
-  .mission-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
-  .mission-id{font-family:var(--font-mono); font-size:11.5px; color:var(--text-faint); letter-spacing:0.05em;}
-  .status-pill{
-    font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
-    padding:4px 9px; border:1px solid currentColor; white-space:nowrap; flex:none;
-  }
-  .status-pill.completed{background:var(--ok-soft); color:var(--ok);}
-  .status-pill.in-development{background:var(--dev-soft); color:var(--dev);}
-  .status-pill.archived{background:var(--arch-soft); color:var(--arch);}
-  .mission-name{font-size:23px; text-transform:uppercase; letter-spacing:0.01em;}
-  .size-lg .mission-name{font-size:29px;}
-  .mission-tagline{color:var(--text-dim); font-size:14px; line-height:1.55;}
-  .mission-metrics{display:flex; flex-direction:column; gap:11px; margin-top:2px; min-width:0;}
-  .metric-row{display:flex; flex-direction:column; gap:5px; min-width:0;}
-  .metric-row-top{display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0;}
-  .metric-label{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint); letter-spacing:0.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;}
-  .metric-segbar{display:flex; gap:2px; width:100%;}
-  .metric-seg{flex:1 1 0; min-width:0; height:11px; background:var(--bg-raised); border:1px solid var(--line); transition:background .05s, border-color .05s;}
-  .metric-seg.filled{background:var(--accent); border-color:var(--accent-dim);}
-  .metric-val{font-family:var(--font-mono); font-size:10.5px; color:var(--text-dim); flex:none; white-space:nowrap;}
-  .mission-meta{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:6px;}
-  .mission-cat{font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent);}
-  .view-affordance{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); letter-spacing:0.05em;}
-  .mission-card:hover .view-affordance{color:var(--accent);}
+    body.has-cursor,
+    body.has-cursor a,
+    body.has-cursor button {
+      cursor: none;
+    }
 
-  /* ---------- Modal ---------- */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(6,8,11,0.9);
-    display:none; align-items:flex-start; justify-content:center; z-index:100;
-    padding:40px 18px; overflow-y:auto;
-  }
-  .modal-overlay.open{display:flex;}
-  .modal{
-    background:var(--bg-panel); border:3px solid var(--line);
-    max-width:760px; width:100%; padding:36px; position:relative; margin:auto;
-    box-shadow:8px 8px 0 0 var(--accent-dim);
-  }
-  .modal::before, .modal::after{
-    content:""; position:absolute; width:20px; height:20px; pointer-events:none;
-  }
-  .modal::before{ top:-3px; left:-3px; border-top:3px solid var(--accent); border-left:3px solid var(--accent); }
-  .modal::after{ bottom:-3px; right:-3px; border-bottom:3px solid var(--accent); border-right:3px solid var(--accent); }
-  .modal-close{
-    position:absolute; top:20px; right:20px; background:transparent; border:1px solid var(--line);
-    color:var(--text-dim); width:32px; height:32px; border-radius:var(--radius); cursor:pointer;
-    font-family:var(--font-mono); font-size:16px; line-height:1;
-  }
-  .modal-close:hover{border-color:var(--accent); color:var(--accent);}
-  .modal-id{font-family:var(--font-mono); font-size:12px; color:var(--text-faint); margin-bottom:14px;}
-  .modal-title{font-family:var(--font-title); font-size:18px; font-weight:400; line-height:1.7; text-transform:uppercase; margin-bottom:10px; padding-right:40px;}
-  .modal-tagline{color:var(--accent); font-size:14px; font-family:var(--font-mono); margin-bottom:22px;}
-  .modal-section{margin-top:24px;}
-  .modal-label{font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); margin-bottom:10px;}
-  .modal-body-text{color:var(--text-dim); font-size:14.5px; line-height:1.7;}
-  .chip-row{display:flex; flex-wrap:wrap; gap:7px;}
-  .chip{
-    font-family:var(--font-mono); font-size:11.5px; padding:5px 10px; border-radius:var(--radius);
-    background:var(--bg-raised); border:1px solid var(--line); color:var(--text-dim);
-  }
-  .feature-list{list-style:none; display:flex; flex-direction:column; gap:9px;}
-  .feature-list li{
-    font-size:14px; color:var(--text-dim); padding-left:18px; position:relative; line-height:1.6;
-  }
-  .feature-list li::before{content:'▸'; position:absolute; left:0; color:var(--accent);}
-  .results-box{
-    background:var(--bg-raised); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px 18px; font-family:var(--font-mono); font-size:13px; color:var(--text); line-height:1.7;
-  }
-  .evidence-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .evidence-grid img{width:100%; display:block; border-radius:var(--radius); border:1px solid var(--line); background:#000;}
-  .evidence-cap{font-family:var(--font-mono); font-size:10px; color:var(--text-faint); margin-top:5px;}
-  .modal-links{display:flex; flex-wrap:wrap; gap:10px; margin-top:28px;}
+    /* ---------- custom cursor ---------- */
+    #cursorDot,
+    #cursorRing {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
 
-  /* ---------- Experience ---------- */
-  .log-entry{
-    border:2px solid var(--line); background:var(--bg-panel);
-    padding:26px 28px; display:flex; flex-direction:column; gap:16px;
-  }
-  .log-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px; border-bottom:2px solid var(--line); padding-bottom:16px;}
-  .log-role{font-family:var(--font-title); font-size:15px; font-weight:400; line-height:1.6; text-transform:uppercase;}
-  .log-org{color:var(--accent); font-family:var(--font-mono); font-size:13px; margin-top:4px;}
-  .log-dates{font-family:var(--font-mono); font-size:12px; color:var(--text-faint); white-space:nowrap;}
-  .log-entry .feature-list{margin-top:2px;}
+    #cursorDot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+    }
 
-  /* ---------- Skills ---------- */
-  .skills-grid{display:grid; grid-template-columns:1fr; gap:22px;}
-  @media(min-width:720px){.skills-grid{grid-template-columns:1fr 1fr;}}
-  .skill-group{border:2px solid var(--line); padding:20px 22px; background:var(--bg-panel);}
-  .skill-group-title{font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:14px;}
-  .chip.is-clickable{cursor:pointer; transition:border-color .15s, color .15s;}
-  .chip.is-clickable:hover{border-color:var(--accent); color:var(--accent);}
+    #cursorRing {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--accent-dim);
+      transition: width .12s steps(3), height .12s steps(3), border-color .12s, opacity .12s;
+      opacity: 0.8;
+    }
 
-  /* ---------- Education ---------- */
-  .edu-card{border:2px solid var(--line); background:var(--bg-panel); padding:26px 28px;}
-  .edu-top{display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; align-items:baseline;}
-  .edu-degree{font-family:var(--font-title); font-size:15px; font-weight:400; line-height:1.6; text-transform:uppercase;}
-  .edu-org{font-family:var(--font-mono); font-size:13px; color:var(--accent); margin-top:4px;}
-  .edu-dates{font-family:var(--font-mono); font-size:12px; color:var(--text-faint);}
-  .edu-grid{display:grid; grid-template-columns:1fr; gap:24px; margin-top:20px;}
-  @media(min-width:720px){.edu-grid{grid-template-columns:1fr 1fr;}}
+    #cursorRing.ring-hover {
+      width: 38px;
+      height: 38px;
+      border-color: var(--accent);
+      opacity: 1;
+    }
 
-  /* ---------- Footer ---------- */
-  footer{border-top:1px solid var(--line); padding:44px 0 60px;}
-  .footer-inner{display:flex; flex-direction:column; gap:22px;}
-  @media(min-width:720px){.footer-inner{flex-direction:row; justify-content:space-between; align-items:flex-end;}}
-  .footer-note{font-family:var(--font-mono); font-size:11.5px; color:var(--text-faint); line-height:1.7;}
+    @media(max-width:900px), (hover:none) {
 
-  /* ---------- mascot ---------- */
-  #mascot{
-    position:fixed; left:0; bottom:14px; z-index:70; pointer-events:none;
-    will-change:transform;
-  }
-  #mascotSprite{
-    width:48px; height:60px;
-    background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYAAAAB4CAYAAAD7cSV/AAADSklEQVR4nO3doW/UYBzH4TuCXnJmghAMEMzM3AweM4eCBIeHvwQ8GhRuBo/BYTAEMAjElu2S+weGOHuFvJe3/Fq+zyMvt7b3S5dP3rRpl4uJ2Zw9vO6xnYPTj8se20lj/rXMv1ba/G9UHwAANQQAIJQAAIQSAIBQAgAQahZXqheLxeJgdbjz6vxmfT6b3zBn5l/L/Gv9r/O3AgAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAgVPNzLIaeiZGm6hkg5r9l/rXMv1av+VsBAIQSAIBQAgAQSgAAQgkAQKibvTZ0dHzSa1Ojurq8aPr+r58/RjqSvsy/lvnXMv/9WAEAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEKrbs4Baffn8qWS/t+7cLdnv1Jh/LfOvZf5bVgAAoQQAIJQAAIQSAIBQAgAQquwuoCFfv33f+fmD+/e6fJ8/M/9a5l8rbf5WAAChBAAglAAAhBIAgFACABBqcncBtV49n8vV9rkw/1rmXytt/lYAAKEEACCUAACEEgCAUAIAEKrsLqCj45OS/V5dXpTsd2rMv5b51zL/LSsAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEJ1exbQh5frXpsaWdtPvv1spMPozPxrmX8t89+PFQBAKAEACCUAAKEEACCUAACE6nYX0KNXq16bGtXU3sjTi/nXMv9a5r8fKwCAUAIAEEoAAEIJAEAoAQAItWz9g4PV4fUYBzI3m/V58+x6mPv8Tx8/2fn52ft3Tdsx/1pzmX+v821qes3fCgAglAAAhBIAgFACABBKAABCNT8LqNfV56fPX+y8mj90db51v0N3CwzdFfD2zeuSuxpaDc1h7Hl21HQXR+Fx7uT8r7XH/GdxvrWeD71YAQCEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQqvlZQL1UvZFn7m8Cmjvz33L+/xtpv7eVFQBAKAEACCUAAKEEACCUAACEmsVbgPi7oTdADZnam7YgWdX/rxUAQCgBAAglAAChBAAglAAAAAAAAAAAAAAAAAAAAAAAAAAAFPgNkBj0ErfMivAAAAAASUVORK5CYII=');
-    background-repeat:no-repeat;
-    background-size:192px 60px; /* 4 frames * 48px */
-    background-position:0 0;
-    image-rendering:pixelated; image-rendering:-moz-crisp-edges; image-rendering:crisp-edges;
-    pointer-events:auto; cursor:pointer;
-    filter:drop-shadow(3px 3px 0 rgba(0,0,0,0.35));
-  }
-  #mascot.face-left #mascotSprite{ transform:scaleX(-1); }
-  #mascotBubble{
-    position:absolute; bottom:68px; left:50%; transform:translateX(-50%) translateY(6px);
-    background:var(--bg-panel); border:2px solid var(--accent); padding:6px 10px;
-    font-family:var(--font-mono); font-size:10.5px; color:var(--text); white-space:nowrap;
-    opacity:0; transition:opacity .15s, transform .15s; pointer-events:none;
-  }
-  #mascotBubble::after{
-    content:""; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%);
-    width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent;
-    border-top:7px solid var(--accent);
-  }
-  #mascotBubble.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-  @media(max-width:640px){ #mascot{ display:none; } }
-  @media (prefers-reduced-motion: reduce){ #mascotSprite{ background-position:0 0 !important; } }
+      #cursorDot,
+      #cursorRing {
+        display: none;
+      }
 
-  .kbd-focus:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
-</style>
+      body.has-cursor,
+      body.has-cursor a,
+      body.has-cursor button {
+        cursor: auto;
+      }
+    }
+
+    /* ---------- boot overlay ---------- */
+    #boot {
+      position: fixed;
+      inset: 0;
+      background: #05070A;
+      z-index: 500;
+      font-family: var(--font-mono);
+      color: var(--ok);
+      font-size: 13px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      transition: opacity .5s ease, visibility .5s;
+    }
+
+    #boot.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #bootLines {
+      max-width: 640px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    #bootLines div {
+      opacity: 0;
+      margin-bottom: 5px;
+      white-space: pre-wrap;
+    }
+
+    #bootLines div.show {
+      opacity: 1;
+    }
+
+    #bootLines .ok-tag {
+      color: var(--ok);
+    }
+
+    #bootLines .dim-tag {
+      color: var(--text-faint);
+    }
+
+    #bootSkip {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      background: none;
+      border: 1px solid var(--line);
+      padding: 7px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    #bootSkip:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg);
+      border-bottom: 2px solid var(--line);
+    }
+
+    .topbar-inner {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      white-space: nowrap;
+    }
+
+    .brand .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--ok);
+      box-shadow: 0 0 0 3px var(--ok-soft);
+      animation: pulse 2.4s steps(2) infinite;
+      flex: none;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.35;
+      }
+    }
+
+    .nav {
+      display: none;
+      gap: 26px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      letter-spacing: 0.06em;
+    }
+
+    .nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color .15s;
+    }
+
+    .nav a:hover {
+      color: var(--accent);
+    }
+
+    @media(min-width:860px) {
+      .nav {
+        display: flex;
+      }
+    }
+
+    .clock {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-faint);
+      display: none;
+      white-space: nowrap;
+    }
+
+    @media(min-width:860px) {
+      .clock {
+        display: block;
+      }
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 11px 18px;
+      text-decoration: none;
+      cursor: pointer;
+      border: 2px solid var(--line);
+      background: var(--bg-panel);
+      color: var(--text);
+      box-shadow: 4px 4px 0 0 var(--line);
+      transition: box-shadow .1s steps(2), transform .1s steps(2), border-color .1s, color .1s;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0 0 var(--line);
+    }
+
+    .btn-solid {
+      background: var(--accent);
+      border-color: #5c4310;
+      color: #14100A;
+      font-weight: 600;
+      box-shadow: 4px 4px 0 0 #5c4310;
+    }
+
+    .btn-solid:hover {
+      background: #ffcb5c;
+      border-color: #5c4310;
+      color: #14100A;
+    }
+
+    .btn-solid:active {
+      box-shadow: 1px 1px 0 0 #5c4310;
+    }
+
+    /* ---------- reveal-on-scroll ---------- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      padding: 80px 0 56px;
+      position: relative;
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow::before {
+      content: '//';
+      color: var(--text-faint);
+    }
+
+    h1.name {
+      font-family: var(--font-title);
+      font-size: clamp(22px, 4.6vw, 42px);
+      font-weight: 400;
+      letter-spacing: 0;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    .role-line {
+      font-family: var(--font-mono);
+      font-size: clamp(13px, 2vw, 16px);
+      color: var(--accent);
+      margin-top: 14px;
+      letter-spacing: 0.02em;
+      min-height: 1.4em;
+    }
+
+    .role-line .cur {
+      display: inline-block;
+      width: 8px;
+      background: var(--accent);
+      animation: blink 1s step-start infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .summary {
+      max-width: 640px;
+      color: var(--text-dim);
+      font-size: 20px;
+      margin-top: 22px;
+    }
+
+    .status-line {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-line .dot2 {
+      width: 6px;
+      height: 6px;
+      background: var(--ok);
+      box-shadow: 0 0 0 3px var(--ok-soft);
+      flex: none;
+    }
+
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .tag-link {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--text-dim);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color .15s, color .15s, transform .15s;
+    }
+
+    .tag-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    /* ---------- Section shell ---------- */
+    section {
+      padding: 60px 0;
+    }
+
+    .section-head {
+      margin-bottom: 32px;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+      min-height: 1.4em;
+    }
+
+    .section-title {
+      font-family: var(--font-title);
+      font-size: clamp(15px, 2vw, 20px);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      line-height: 1.6;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      border: none;
+      margin: 0;
+    }
+
+    /* ---------- Mission stats ---------- */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      background: var(--line);
+      border: 2px solid var(--line);
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+
+    @media(min-width:640px) {
+      .stats-bar {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat {
+      background: var(--bg-panel);
+      padding: 22px 20px;
+    }
+
+    .stat-num {
+      font-family: var(--font-title);
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .stat.is-ok .stat-num {
+      color: var(--ok);
+    }
+
+    .stat.is-dev .stat-num {
+      color: var(--dev);
+    }
+
+    .stat.is-arch .stat-num {
+      color: var(--arch);
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-top: 6px;
+    }
+
+    /* ---------- Terminal ---------- */
+    .terminal {
+      background: #05070A;
+      border: 2px solid var(--line);
+      margin-bottom: 32px;
+      font-family: var(--font-mono);
+      overflow: hidden;
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-raised);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .terminal-dots span {
+      width: 9px;
+      height: 9px;
+      background: #3A424D;
+    }
+
+    .terminal-title {
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+      margin-left: 4px;
+    }
+
+    .terminal-hint {
+      margin-left: auto;
+      font-size: 10.5px;
+      color: var(--text-faint);
+    }
+
+    .terminal-hint kbd {
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: var(--font-mono);
+    }
+
+    #termOutput {
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 14px 16px;
+      font-size: 12.5px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    #termOutput .line {
+      white-space: pre-wrap;
+    }
+
+    #termOutput .prompt-echo {
+      color: var(--text);
+    }
+
+    #termOutput .prompt-echo::before {
+      content: '$ ';
+      color: var(--accent);
+    }
+
+    #termOutput .err {
+      color: #F87171;
+    }
+
+    #termOutput .ok-line {
+      color: var(--ok);
+    }
+
+    #termOutput .accent-line {
+      color: var(--accent);
+    }
+
+    .terminal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .terminal-prompt {
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    #termInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    #termInput::placeholder {
+      color: var(--text-faint);
+    }
+
+    /* ---------- Filters ---------- */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .filter-btn {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .1s steps(2);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #14100A;
+      font-weight: 600;
+    }
+
+    /* ---------- Bento mission grid ---------- */
+    .mission-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media(min-width:720px) {
+      .mission-grid {
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: minmax(180px, auto);
+      }
+
+      .mission-card.size-lg {
+        grid-column: span 2;
+        grid-row: span 2;
+      }
+
+      .mission-card.size-md {
+        grid-column: span 2;
+        grid-row: span 1;
+      }
+
+      .mission-card.size-sm {
+        grid-column: span 2;
+        grid-row: span 1;
+      }
+    }
+
+    @media(min-width:1000px) {
+      .mission-card.size-sm {
+        grid-column: span 1;
+      }
+    }
+
+    .mission-card {
+      background: var(--bg-panel);
+      border: 2px solid var(--line);
+      padding: 22px;
+      cursor: pointer;
+      transition: border-color .1s, background .1s, box-shadow .1s;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      will-change: transform;
+      position: relative;
+      transform-style: preserve-3d;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .mission-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-panel-2);
+      box-shadow: 6px 6px 0 0 var(--accent-dim);
+      transform: translate(-3px, -3px);
+    }
+
+    .mission-card::before,
+    .mission-card::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s;
+    }
+
+    .mission-card::before {
+      top: -2px;
+      left: -2px;
+      border-top: 3px solid var(--accent);
+      border-left: 3px solid var(--accent);
+    }
+
+    .mission-card::after {
+      bottom: -2px;
+      right: -2px;
+      border-bottom: 3px solid var(--accent);
+      border-right: 3px solid var(--accent);
+    }
+
+    .mission-card:hover::before,
+    .mission-card:hover::after {
+      opacity: 1;
+    }
+
+    .mission-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .mission-id {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+    }
+
+    .status-pill {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+      flex: none;
+    }
+
+    .status-pill.completed {
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+
+    .status-pill.in-development {
+      background: var(--dev-soft);
+      color: var(--dev);
+    }
+
+    .status-pill.archived {
+      background: var(--arch-soft);
+      color: var(--arch);
+    }
+
+    .mission-name {
+      font-size: 23px;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+    }
+
+    .size-lg .mission-name {
+      font-size: 29px;
+    }
+
+    .mission-tagline {
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .mission-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      margin-top: 2px;
+      min-width: 0;
+    }
+
+    .metric-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .metric-row-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-faint);
+      letter-spacing: 0.02em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .metric-segbar {
+      display: flex;
+      gap: 2px;
+      width: 100%;
+    }
+
+    .metric-seg {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 11px;
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      transition: background .05s, border-color .05s;
+    }
+
+    .metric-seg.filled {
+      background: var(--accent);
+      border-color: var(--accent-dim);
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-dim);
+      flex: none;
+      white-space: nowrap;
+    }
+
+    .mission-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 6px;
+    }
+
+    .mission-cat {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .view-affordance {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+    }
+
+    .mission-card:hover .view-affordance {
+      color: var(--accent);
+    }
+
+    /* ---------- Modal ---------- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 8, 11, 0.9);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 100;
+      padding: 40px 18px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-panel);
+      border: 3px solid var(--line);
+      max-width: 760px;
+      width: 100%;
+      padding: 36px;
+      position: relative;
+      margin: auto;
+      box-shadow: 8px 8px 0 0 var(--accent-dim);
+    }
+
+    .modal::before,
+    .modal::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+
+    .modal::before {
+      top: -3px;
+      left: -3px;
+      border-top: 3px solid var(--accent);
+      border-left: 3px solid var(--accent);
+    }
+
+    .modal::after {
+      bottom: -3px;
+      right: -3px;
+      border-bottom: 3px solid var(--accent);
+      border-right: 3px solid var(--accent);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text-dim);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .modal-id {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      font-family: var(--font-title);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.7;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      padding-right: 40px;
+    }
+
+    .modal-tagline {
+      color: var(--accent);
+      font-size: 14px;
+      font-family: var(--font-mono);
+      margin-bottom: 22px;
+    }
+
+    .modal-section {
+      margin-top: 24px;
+    }
+
+    .modal-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+    }
+
+    .modal-body-text {
+      color: var(--text-dim);
+      font-size: 14.5px;
+      line-height: 1.7;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 5px 10px;
+      border-radius: var(--radius);
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      color: var(--text-dim);
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .feature-list li {
+      font-size: 14px;
+      color: var(--text-dim);
+      padding-left: 18px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .feature-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    .results-box {
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .evidence-grid img {
+      width: 100%;
+      display: block;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #000;
+    }
+
+    .evidence-cap {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      margin-top: 5px;
+    }
+
+    .modal-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    /* ---------- Experience ---------- */
+    .log-entry {
+      border: 2px solid var(--line);
+      background: var(--bg-panel);
+      padding: 26px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .log-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 16px;
+    }
+
+    .log-role {
+      font-family: var(--font-title);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.6;
+      text-transform: uppercase;
+    }
+
+    .log-org {
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .log-dates {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      white-space: nowrap;
+    }
+
+    .log-entry .feature-list {
+      margin-top: 2px;
+    }
+
+    /* ---------- Skills ---------- */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+
+    @media(min-width:720px) {
+      .skills-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .skill-group {
+      border: 2px solid var(--line);
+      padding: 20px 22px;
+      background: var(--bg-panel);
+    }
+
+    .skill-group-title {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .chip.is-clickable {
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+
+    .chip.is-clickable:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ---------- Education ---------- */
+    .edu-card {
+      border: 2px solid var(--line);
+      background: var(--bg-panel);
+      padding: 26px 28px;
+    }
+
+    .edu-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .edu-degree {
+      font-family: var(--font-title);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.6;
+      text-transform: uppercase;
+    }
+
+    .edu-org {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .edu-dates {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+
+    .edu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    @media(min-width:720px) {
+      .edu-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 44px 0 60px;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    @media(min-width:720px) {
+      .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+    }
+
+    .footer-note {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-faint);
+      line-height: 1.7;
+    }
+
+    /* ---------- mascot ---------- */
+    #mascot {
+      position: fixed;
+      left: 0;
+      bottom: 14px;
+      z-index: 70;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    #mascotSprite {
+      width: 48px;
+      height: 60px;
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYAAAAB4CAYAAAD7cSV/AAADSklEQVR4nO3doW/UYBzH4TuCXnJmghAMEMzM3AweM4eCBIeHvwQ8GhRuBo/BYTAEMAjElu2S+weGOHuFvJe3/Fq+zyMvt7b3S5dP3rRpl4uJ2Zw9vO6xnYPTj8se20lj/rXMv1ba/G9UHwAANQQAIJQAAIQSAIBQAgAQahZXqheLxeJgdbjz6vxmfT6b3zBn5l/L/Gv9r/O3AgAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAgVPNzLIaeiZGm6hkg5r9l/rXMv1av+VsBAIQSAIBQAgAQSgAAQgkAQKibvTZ0dHzSa1Ojurq8aPr+r58/RjqSvsy/lvnXMv/9WAEAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEKrbs4Baffn8qWS/t+7cLdnv1Jh/LfOvZf5bVgAAoQQAIJQAAIQSAIBQAgAQquwuoCFfv33f+fmD+/e6fJ8/M/9a5l8rbf5WAAChBAAglAAAhBIAgFACABBqcncBtV49n8vV9rkw/1rmXytt/lYAAKEEACCUAACEEgCAUAIAEKrsLqCj45OS/V5dXpTsd2rMv5b51zL/LSsAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEJ1exbQh5frXpsaWdtPvv1spMPozPxrmX8t89+PFQBAKAEACCUAAKEEACCUAACE6nYX0KNXq16bGtXU3sjTi/nXMv9a5r8fKwCAUAIAEEoAAEIJAEAoAQAItWz9g4PV4fUYBzI3m/V58+x6mPv8Tx8/2fn52ft3Tdsx/1pzmX+v821qes3fCgAglAAAhBIAgFACABBKAABCNT8LqNfV56fPX+y8mj90db51v0N3CwzdFfD2zeuSuxpaDc1h7Hl21HQXR+Fx7uT8r7XH/GdxvrWeD71YAQCEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQqvlZQL1UvZFn7m8Cmjvz33L+/xtpv7eVFQBAKAEACCUAAKEEACCUAACEmsVbgPi7oTdADZnam7YgWdX/rxUAQCgBAAglAAChBAAglAAAAAAAAAAAAAAAAAAAAAAAAAAAFPgNkBj0ErfMivAAAAAASUVORK5CYII=');
+      background-repeat: no-repeat;
+      background-size: 192px 60px;
+      /* 4 frames * 48px */
+      background-position: 0 0;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      pointer-events: auto;
+      cursor: pointer;
+      filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.35));
+    }
+
+    #mascot.face-left #mascotSprite {
+      transform: scaleX(-1);
+    }
+
+    #mascotBubble {
+      position: absolute;
+      bottom: 68px;
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: var(--bg-panel);
+      border: 2px solid var(--accent);
+      padding: 6px 10px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .15s, transform .15s;
+      pointer-events: none;
+    }
+
+    #mascotBubble::after {
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 7px solid var(--accent);
+    }
+
+    #mascotBubble.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media(max-width:640px) {
+      #mascot {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #mascotSprite {
+        background-position: 0 0 !important;
+      }
+    }
+
+    .kbd-focus:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="cursorRing"></div>
-<div id="cursorDot"></div>
+  <div id="cursorRing"></div>
+  <div id="cursorDot"></div>
 
-<div id="boot">
-  <button id="bootSkip">SKIP →</button>
-  <div id="bootLines"></div>
-</div>
-
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="brand"><span class="dot"></span>N.PEÑALOZA-FRIQUI // FIELD LOG</div>
-    <nav class="nav">
-      <a href="#missions">Missions</a>
-      <a href="#experience">Experience</a>
-      <a href="#skills">Skills</a>
-      <a href="#education">Education</a>
-      <a href="#contact">Contact</a>
-    </nav>
-    <div class="clock" id="clock">SEVILLE 00:00:00</div>
+  <div id="boot">
+    <button id="bootSkip">SKIP →</button>
+    <div id="bootLines"></div>
   </div>
-</div>
 
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow reveal">Field log · Seville, Spain</div>
-    <h1 class="name reveal">Nora Peñaloza<br>Friqui</h1>
-    <div class="role-line reveal" id="roleLine"></div>
-    <p class="summary reveal">Software engineer with production experience in Java, TypeScript, and Angular at NTT DATA, and applied ML research spanning NLP and computer vision — from a suicidal-ideation and depression detection system graded 10/10, to an end-to-end volleyball computer-vision pipeline with models shipped on HuggingFace Hub.</p>
-    <div class="status-line reveal"><span class="dot2"></span>currently open to software engineering &amp; applied ML/NLP roles</div>
-    <div class="contact-row reveal">
-      <a class="tag-link" href="mailto:npenfriq23@gmail.com">npenfriq23@gmail.com</a>
-      <a class="tag-link" href="tel:+34643788303">+34 643 788 303</a>
-      <a class="tag-link" href="https://www.linkedin.com/in/nora-peñaloza-friqui-79879b351" target="_blank" rel="noopener">linkedin.com/in/nora-peñaloza-friqui</a>
-      <a class="tag-link" href="https://github.com/norapfr" target="_blank" rel="noopener">github.com/norapfr</a>
-    </div>
-    <div class="hero-cta reveal">
-      <a class="btn btn-solid" href="#missions">View Mission Database</a>
-      <a class="btn" href="https://github.com/norapfr" target="_blank" rel="noopener">[ View GitHub Profile ]</a>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="dot"></span>N.PEÑALOZA-FRIQUI // FIELD LOG</div>
+      <nav class="nav">
+        <a href="#missions">Missions</a>
+        <a href="#experience">Experience</a>
+        <a href="#skills">Skills</a>
+        <a href="#education">Education</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="clock" id="clock">SEVILLE 00:00:00</div>
     </div>
   </div>
-</header>
 
-<hr class="divider">
-
-<section id="missions">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div class="section-tag" data-decode="Mission database">Mission database</div>
-      <div class="section-title">Project archive</div>
-    </div>
-
-    <div class="stats-bar reveal">
-      <div class="stat"><div class="stat-num" data-count="9">0</div><div class="stat-label">Total missions found</div></div>
-      <div class="stat is-ok"><div class="stat-num" data-count="6">0</div><div class="stat-label">Completed</div></div>
-      <div class="stat is-dev"><div class="stat-num" data-count="2">0</div><div class="stat-label">In development</div></div>
-      <div class="stat is-arch"><div class="stat-num" data-count="1">0</div><div class="stat-label">Archived</div></div>
-    </div>
-
-    <div class="terminal reveal">
-      <div class="terminal-bar">
-        <div class="terminal-dots"><span></span><span></span><span></span></div>
-        <div class="terminal-title">field-log — mission-console</div>
-        <div class="terminal-hint">press <kbd>/</kbd> to focus · try <kbd>help</kbd></div>
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow reveal">Field log · Seville, Spain</div>
+      <h1 class="name reveal">Nora Peñaloza<br>Friqui</h1>
+      <div class="role-line reveal" id="roleLine"></div>
+      <p class="summary reveal">Software engineer with production experience in Java, TypeScript, and Angular at NTT
+        DATA, and applied ML research spanning NLP and computer vision — from a suicidal-ideation and depression
+        detection system graded 10/10, to an end-to-end volleyball computer-vision pipeline with models shipped on
+        HuggingFace Hub.</p>
+      <div class="status-line reveal"><span class="dot2"></span>currently open to software engineering &amp; applied
+        ML/NLP roles</div>
+      <div class="contact-row reveal">
+        <a class="tag-link" href="mailto:npenfriq23@gmail.com">npenfriq23@gmail.com</a>
+        <a class="tag-link" href="tel:+34643788303">+34 643 788 303</a>
+        <a class="tag-link" href="https://www.linkedin.com/in/nora-peñaloza-friqui-79879b351" target="_blank"
+          rel="noopener">linkedin.com/in/nora-peñaloza-friqui</a>
+        <a class="tag-link" href="https://github.com/norapfr" target="_blank" rel="noopener">github.com/norapfr</a>
       </div>
-      <div id="termOutput"></div>
-      <div class="terminal-input-row">
-        <span class="terminal-prompt">nora@field-log:~$</span>
-        <input id="termInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command…">
+      <div class="hero-cta reveal">
+        <a class="btn btn-solid" href="#missions">View Mission Database</a>
+        <a class="btn" href="https://github.com/norapfr" target="_blank" rel="noopener">[ View GitHub Profile ]</a>
       </div>
     </div>
+  </header>
 
-    <div class="filters reveal" id="filters"></div>
-    <div class="mission-grid reveal" id="missionGrid"></div>
-  </div>
-</section>
+  <hr class="divider">
 
-<hr class="divider">
+  <section id="missions">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-tag" data-decode="Mission database">Mission database</div>
+        <div class="section-title">Project archive</div>
+      </div>
 
-<section id="experience">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div class="section-tag" data-decode="Operational history">Operational history</div>
-      <div class="section-title">Experience</div>
-    </div>
-    <div class="log-entry reveal">
-      <div class="log-head">
-        <div>
-          <div class="log-role">Software Developer — Internship</div>
-          <div class="log-org">NTT DATA</div>
+      <div class="stats-bar reveal">
+        <div class="stat">
+          <div class="stat-num" data-count="10">0</div>
+          <div class="stat-label">Total missions found</div>
         </div>
-        <div class="log-dates">Jan 2026 – Aug 2026</div>
-      </div>
-      <ul class="feature-list">
-        <li>Built and shipped Angular/TypeScript UI components integrated with Java/Spring Boot backend services, delivering end-to-end features for public-sector client platforms.</li>
-        <li>Developed reusable Spring Boot business-logic modules backed by SQL databases via Hibernate, for enterprise client projects within a multidisciplinary delivery team in a large-scale consulting environment.</li>
-        <li>Worked with Node.js services, and used Jira for sprint/task tracking and SonarQube for code-quality analysis as part of the team's delivery workflow.</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section id="skills">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div class="section-tag" data-decode="Loadout">Loadout</div>
-      <div class="section-title">Skills</div>
-    </div>
-    <div class="skills-grid reveal" id="skillsGrid"></div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section id="education">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div class="section-tag" data-decode="Training record">Training record</div>
-      <div class="section-title">Education & activities</div>
-    </div>
-    <div class="edu-card reveal">
-      <div class="edu-top">
-        <div>
-          <div class="edu-degree">B.Sc. Computer Engineering — Software Engineering</div>
-          <div class="edu-org">Universidad de Sevilla</div>
+        <div class="stat is-ok">
+          <div class="stat-num" data-count="7">0</div>
+          <div class="stat-label">Completed</div>
         </div>
-        <div class="edu-dates">Sep 2022 – Jul 2026</div>
-      </div>
-      <div class="edu-grid">
-        <div>
-          <div class="modal-label" style="margin-top:16px;">Record</div>
-          <p class="modal-body-text">GPA: 8.41/10. Distinction in Infinitesimal &amp; Numerical Calculus, Linear &amp; Numerical Algebra, and Computer Networks.<br><br>Bachelor's Thesis: <em>Artificial Intelligence in Mental Health</em> — see the SocialMindScan mission above.</p>
+        <div class="stat is-dev">
+          <div class="stat-num" data-count="2">0</div>
+          <div class="stat-label">In development</div>
         </div>
-        <div>
-          <div class="modal-label" style="margin-top:16px;">Core areas of the degree</div>
-          <ul class="feature-list">
-            <li>Software project management, planning, coordination and delivery.</li>
-            <li>Requirements engineering: elicitation, analysis, specification, validation.</li>
-            <li>End-to-end development — design, implementation, testing, deployment, maintenance.</li>
-            <li>Software architecture and databases.</li>
-            <li>Mathematical foundations, algorithms and artificial intelligence.</li>
-          </ul>
+        <div class="stat is-arch">
+          <div class="stat-num" data-count="1">0</div>
+          <div class="stat-label">Archived</div>
         </div>
       </div>
-      <div class="modal-label" style="margin-top:26px;">Activities</div>
-      <p class="modal-body-text"><strong style="color:var(--text);">Algorithmics Club</strong> — Universidad de Sevilla (2024 – Present). Competed in Ada Byron Regional 2025, a national university-level competitive programming contest.</p>
+
+      <div class="terminal reveal">
+        <div class="terminal-bar">
+          <div class="terminal-dots"><span></span><span></span><span></span></div>
+          <div class="terminal-title">field-log — mission-console</div>
+          <div class="terminal-hint">press <kbd>/</kbd> to focus · try <kbd>help</kbd></div>
+        </div>
+        <div id="termOutput"></div>
+        <div class="terminal-input-row">
+          <span class="terminal-prompt">nora@field-log:~$</span>
+          <input id="termInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command…">
+        </div>
+      </div>
+
+      <div class="filters reveal" id="filters"></div>
+      <div class="mission-grid reveal" id="missionGrid"></div>
     </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="experience">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-tag" data-decode="Operational history">Operational history</div>
+        <div class="section-title">Experience</div>
+      </div>
+      <div class="log-entry reveal">
+        <div class="log-head">
+          <div>
+            <div class="log-role">Software Developer — Internship</div>
+            <div class="log-org">NTT DATA</div>
+          </div>
+          <div class="log-dates">Jan 2026 – Aug 2026</div>
+        </div>
+        <ul class="feature-list">
+          <li>Built and shipped Angular/TypeScript UI components integrated with Java/Spring Boot backend services,
+            delivering end-to-end features for public-sector client platforms.</li>
+          <li>Developed reusable Spring Boot business-logic modules backed by SQL databases via Hibernate, for
+            enterprise client projects within a multidisciplinary delivery team in a large-scale consulting environment.
+          </li>
+          <li>Worked with Node.js services, and used Jira for sprint/task tracking and SonarQube for code-quality
+            analysis as part of the team's delivery workflow.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-tag" data-decode="Loadout">Loadout</div>
+        <div class="section-title">Skills</div>
+      </div>
+      <div class="skills-grid reveal" id="skillsGrid"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="education">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-tag" data-decode="Training record">Training record</div>
+        <div class="section-title">Education & activities</div>
+      </div>
+      <div class="edu-card reveal">
+        <div class="edu-top">
+          <div>
+            <div class="edu-degree">B.Sc. Computer Engineering — Software Engineering</div>
+            <div class="edu-org">Universidad de Sevilla</div>
+          </div>
+          <div class="edu-dates">Sep 2022 – Jul 2026</div>
+        </div>
+        <div class="edu-grid">
+          <div>
+            <div class="modal-label" style="margin-top:16px;">Record</div>
+            <p class="modal-body-text">GPA: 8.41/10. Distinction in Infinitesimal &amp; Numerical Calculus, Linear &amp;
+              Numerical Algebra, and Computer Networks.<br><br>Bachelor's Thesis: <em>Artificial Intelligence in Mental
+                Health</em> — see the SocialMindScan mission above.</p>
+          </div>
+          <div>
+            <div class="modal-label" style="margin-top:16px;">Core areas of the degree</div>
+            <ul class="feature-list">
+              <li>Software project management, planning, coordination and delivery.</li>
+              <li>Requirements engineering: elicitation, analysis, specification, validation.</li>
+              <li>End-to-end development — design, implementation, testing, deployment, maintenance.</li>
+              <li>Software architecture and databases.</li>
+              <li>Mathematical foundations, algorithms and artificial intelligence.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-label" style="margin-top:26px;">Activities</div>
+        <p class="modal-body-text"><strong style="color:var(--text);">Algorithmics Club</strong> — Universidad de
+          Sevilla (2024 – Present). Competed in Ada Byron Regional 2025, a national university-level competitive
+          programming contest.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="wrap footer-inner reveal">
+      <div class="footer-note">
+        Mission data compiled from public repositories at github.com/norapfr, cross-referenced with author-reported
+        results.<br>
+        Static archive — stays online independent of GitHub availability. <span id="footSync"></span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn" href="mailto:npenfriq23@gmail.com">Email</a>
+        <a class="btn" href="https://www.linkedin.com/in/nora-peñaloza-friqui-79879b351" target="_blank"
+          rel="noopener">LinkedIn</a>
+        <a class="btn btn-solid" href="https://github.com/norapfr" target="_blank" rel="noopener">[ View GitHub Profile
+          ]</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="mascot" aria-hidden="true">
+    <div id="mascotBubble"></div>
+    <div id="mascotSprite"></div>
   </div>
-</section>
 
-<footer id="contact">
-  <div class="wrap footer-inner reveal">
-    <div class="footer-note">
-      Mission data compiled from public repositories at github.com/norapfr, cross-referenced with author-reported results.<br>
-      Static archive — stays online independent of GitHub availability. <span id="footSync"></span>
-    </div>
-    <div class="hero-cta">
-      <a class="btn" href="mailto:npenfriq23@gmail.com">Email</a>
-      <a class="btn" href="https://www.linkedin.com/in/nora-peñaloza-friqui-79879b351" target="_blank" rel="noopener">LinkedIn</a>
-      <a class="btn btn-solid" href="https://github.com/norapfr" target="_blank" rel="noopener">[ View GitHub Profile ]</a>
-    </div>
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent" role="dialog" aria-modal="true"></div>
   </div>
-</footer>
 
-<div id="mascot" aria-hidden="true">
-  <div id="mascotBubble"></div>
-  <div id="mascotSprite"></div>
-</div>
+  <script>
+    /* =====================================================================
+       data/projects.ts (equivalent) — single source of truth for the
+       mission grid. Decoupled from any live GitHub call so the page keeps
+       working even if GitHub is unreachable. `metrics` are author-reported
+       numbers turned into inline bars; `images` (dog-vocalization only)
+       are real result figures hotlinked from the repo itself.
+       Sourced from: github.com/norapfr public repositories, August 2026.
+    ===================================================================== */
+    const PROJECTS = [
+      {
+        id: "NP-01", name: "VolleyVision AI", status: "completed", category: "COMPUTER VISION", size: "lg",
+        tagline: "Volleyball match footage in, tactical scouting report out.",
+        description: "End-to-end computer vision pipeline for volleyball tactical analysis and scouting, built from scratch with no prior CV experience. Detects players and ball per frame (YOLOv8), tracks individual players across frames (ByteTrack), classifies six tactical events, and turns match footage into heatmaps, event timelines, and exportable PDF scouting reports.",
+        tech: ["Python 3.11", "YOLOv8 (Ultralytics)", "ByteTrack", "PyTorch 2.1", "OpenCV", "Streamlit + Plotly", "scikit-learn (PCA/K-Means/KNN)", "FastAPI", "MLflow", "Docker", "GitHub Actions", "HuggingFace Hub / Spaces", "Render"],
+        features: [
+          "Phase 1 — Player & ball detection (YOLOv8) + multi-object tracking (ByteTrack)",
+          "Phase 2 — Event classification (serve, attack, block, reception, setting, defense) via 2-stage training: base pass on a 25,000-image dataset, then multi-angle fine-tuning",
+          "Phase 3 — Streamlit dashboard: heatmaps, event timeline, stats, PDF report export",
+          "Phase 4 — Scouting ML: zone and individual player tactical profiles via PCA + K-Means + KNN",
+          "Phase 5 — MLOps: REST API (FastAPI), Docker, MLflow tracking, CI/CD, models published to HuggingFace Hub"
+        ],
+        metrics: [{ label: "Event mAP50", value: 97.1 }, { label: "Precision", value: 97.2 }, { label: "Recall", value: 96.8 }],
+        results: "Event classification (test set): precision 0.972 · recall 0.968 · mAP50 0.971 · mAP50-95 0.881 across all 6 classes.\nDetection (val set): precision 0.728 · recall 0.825 · mAP50 0.861 (players + ball).",
+        links: [
+          { label: "GitHub", url: "https://github.com/norapfr/volleyvision-ai" },
+          { label: "Live demo (HF Spaces)", url: "https://huggingface.co/spaces/norapfr/volleyvision-ai" },
+          { label: "Live demo (Render)", url: "https://volleyvision-ai.onrender.com" },
+          { label: "Models (HF Hub)", url: "https://huggingface.co/norapfr/volleyvision-models" }
+        ]
+      },
+      {
+        id: "NP-02", name: "SocialMindScan — Bachelor's Thesis", status: "completed", category: "NLP", size: "lg",
+        tagline: "Can Reddit text flag depression and suicidal ideation early — and how well?",
+        description: "Bachelor's thesis (Universidad de Sevilla, graded 10/10) building a system to detect depression and suicidal ideation in Reddit text. Benchmarks 5 classical ML models against 6 neural architectures across 7 text representations (TF-IDF, Word2Vec, BERT, RoBERTa, SBERT), with over 60 model×representation configurations systematically evaluated and compared against published state of the art.",
+        tech: ["Python 3.11", "scikit-learn", "Optuna", "NLTK", "spaCy", "Gensim (Word2Vec)", "HuggingFace Transformers (BERT / RoBERTa / SBERT)"],
+        features: [
+          "Two independent, balanced datasets: 88,585 posts (depression) and 73,729 posts (suicide), combining public datasets with the author's own Reddit API scraping",
+          "Preprocessing: character-repetition normalization, NER removal (spaCy), negation-aware stopword filtering, contraction expansion, lemmatization + POS tagging",
+          "60+ model × representation combinations benchmarked with grid search / Optuna hyperparameter tuning",
+          "Systematic comparison against 4 published baselines (Turcan & McKeown, Pirina & Çöltekin, Yeskuatov et al., Haque et al.)"
+        ],
+        metrics: [{ label: "F1 Suicide (SVM+TF-IDF)", value: 90.9 }, { label: "F1 Depression (best)", value: 88.6 }],
+        results: "Suicidal ideation: F1 0.909 (SVM + TF-IDF) · F1 0.900 (CNN + BERT).\nDepression: F1 0.886 (Logistic Regression/SVM + TF-IDF and BiGRU + Word2Vec).\nExceeds reported literature baselines, e.g. Turcan & McKeown F1 0.807; Pirina & Çöltekin F1 0.55–0.64.",
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/SocialMindScan" }]
+      },
+      {
+        id: "NP-04", name: "ATMOSPHERICA", status: "completed", category: "DATA", size: "md",
+        tagline: "Seville's weather, painted daily — with a model guessing tomorrow's extremes.",
+        description: "A real-time atmospheric data pipeline that turns live weather and air-quality readings for Seville into a deterministic generative painting, while a Random Forest model predicts the probability of an extreme weather event the next day. Every shape, colour, and warning mark in the artwork is traceable to a real atmospheric variable, and the gallery publishes itself automatically to GitHub Pages.",
+        tech: ["Python 3.11", "pandas / NumPy", "scikit-learn", "PyTorch", "SHAP", "xarray / netCDF4 / cdsapi", "HTML5 Canvas", "JavaScript", "Playwright", "GitHub Actions", "GitHub Pages"],
+        features: [
+          "Visual grammar mapping 7 atmospheric variables (temperature, wind, humidity, pressure, cloud cover, PM2.5, rain) to concrete shapes and colours",
+          "Random Forest extreme-event classifier trained on ERA5 reanalysis data (1940–1990 baseline + 2010–2024 contemporary regime)",
+          "Graduated risk visualization: 5 threshold tiers baked directly into the artwork as it's generated",
+          "Fully automated: daily fetch, generation, PNG export via Playwright, and Pages deploy through GitHub Actions"
+        ],
+        metrics: [{ label: "ROC-AUC (Random Forest)", value: 83.6 }, { label: "ROC-AUC (LSTM baseline)", value: 67.8 }],
+        results: "Random Forest: mean ROC-AUC 0.836 (vs. LSTM baseline 0.678) on a 5% event-rate imbalanced problem.\nTop predictive features by SHAP: minimum pressure, maximum temperature, seasonality (cos of day-of-year).",
+        links: [
+          { label: "GitHub", url: "https://github.com/norapfr/atmospherica" },
+          { label: "Live exhibition", url: "https://norapfr.github.io/atmospherica" }
+        ]
+      },
+      {
+        id: "NP-08", name: "Volley Predictor", status: "completed", category: "MACHINE LEARNING", size: "lg",
+        tagline: "Calling the winner, the set score, and the margin — before the match is played.",
+        description: "End-to-end machine learning system predicting international volleyball match outcomes for men's and women's national teams. Ingests historical results from FIVB VIS, computes Elo ratings, engineers form/streak/head-to-head features, and trains CatBoost models with walk-forward validation, benchmarked against Elo, Bradley-Terry, logistic regression, LightGBM and XGBoost. The interface deliberately doesn't allow picking a past match date — it always predicts from each team's latest saved state, so predictions can't be gamed by choosing a different date.",
+        tech: ["Python 3.12", "CatBoost", "scikit-learn", "pandas", "NumPy", "FastAPI", "Pydantic", "Streamlit", "pytest"],
+        features: [
+          "FIVB VIS ingestion pipeline with cleaning, normalization, and leakage checks",
+          "Elo ratings plus engineered features: streaks, head-to-head record, recent form, competition importance, tournament progress",
+          "Predicts more than the winner — most likely set score, exact-score confidence, and expected total point margin",
+          "Streamlit dashboard with win-probability bar, Elo per team, and a 'Why this prediction?' explanation panel"
+        ],
+        metrics: [{ label: "Accuracy — Women", value: 76.0 }, { label: "Accuracy — Men", value: 72.5 }],
+        results: "Trained on 6,626 historical matches (2006–2026) across 158 national teams (154 men's, 134 women's).\nWinner accuracy: 72.5% men · 76.0% women (walk-forward validation). Exact-score accuracy: 39.7% men · 47.8% women.\nCatBoost was the final model, outperforming Elo, Bradley-Terry, logistic regression, LightGBM and XGBoost.",
+        links: [
+          { label: "GitHub", url: "https://github.com/norapfr/volley_predictor" },
+          { label: "Live demo (Streamlit)", url: "https://volleypredictor-hof7bptw7hc5bze3w7ptwl.streamlit.app/#volley-predictor" }
+        ]
+      },
+      {
+        id: "NP-03", name: "SocialMind_APP", status: "completed", category: "WEB", size: "sm",
+        tagline: "Turning the thesis models into something a person could actually use.",
+        description: "Full-stack Django application that puts the SocialMindScan thesis models in front of a real user: a private space to write or upload personal text, track AI-generated risk signals over time, and talk to a context-aware supportive chatbot.",
+        tech: ["Python", "Django 5", "HTML templates", "JavaScript", "SQLite / Django ORM", "TensorFlow", "PyTorch", "BERT", "HuggingFace"],
+        features: [
+          "Runs 6 trained CNN and GRU models using Word2Vec and BERT representations",
+          "Post history, trend view, and labels so results are easy to follow over time",
+          "Two chatbot modes — remote inference and local inference",
+          "Authentication, async endpoints, and configurable AI backends"
+        ],
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/SocialMind_APP" }]
+      },
+      {
+        id: "NP-05", name: "LunarEntorno — RL Agent (DQN)", status: "completed", category: "MACHINE LEARNING", size: "sm",
+        tagline: "Teaching a lander to land itself, one replayed experience at a time.",
+        description: "A Deep Q-Network reinforcement learning agent trained to solve OpenAI Gym's LunarLander environment, using experience replay and target networks to stabilize training.",
+        tech: ["Python", "Deep Q-Network (DQN)", "Experience replay", "Target networks"],
+        features: [
+          "Custom DQN implementation with a dedicated training script and notebook",
+          "Multiple saved model checkpoints tracking progress across training iterations",
+          "Written reports documenting the reinforcement-learning approach"
+        ],
+        metrics: [{ label: "Successful landings", value: 85 }],
+        results: "85% successful landing rate across evaluation episodes, as reported by the author.",
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/LunarEntorno" }]
+      },
+      {
+        id: "NP-06", name: "Dog Vocalization Classification", status: "in-development", category: "DATA", size: "sm",
+        tagline: "Do dog barks cluster into a vocabulary on their own — without being told the labels?",
+        description: "A research project testing whether an unsupervised acoustic vocabulary of dog vocalizations emerges from clustering alone, comparing a classical representation (MFCC) against a deep audio embedding (HuBERT) and using real labels only afterward, as an auditing tool rather than a training signal.",
+        tech: ["Python", "MFCC audio features", "HuBERT embeddings", "Clustering", "NMI / ARI / Silhouette / purity metrics"],
+        features: [
+          "20,138 audio segments processed — 91 dogs, 14 labels, 417 minutes of material",
+          "Four-stage pipeline: exploratory data analysis → MFCC experiment → HuBERT experiment → comparison",
+          "Labels deliberately withheld from the clustering step, used only afterward to interpret the discovered clusters"
+        ],
+        images: [
+          { src: "https://raw.githubusercontent.com/norapfr/dog-vocalization-classification/main/results/figures/comparacion_mfcc_vs_hubert.png", cap: "MFCC vs HuBERT — comparison" },
+          { src: "https://raw.githubusercontent.com/norapfr/dog-vocalization-classification/main/results/figures/tsne_prueba_2_hubert.png", cap: "t-SNE projection — HuBERT" }
+        ],
+        results: "Interim results — project still in progress.\nMFCC: Silhouette 0.067 · NMI 0.086 · ARI 0.060 · purity 0.458.\nHuBERT: Silhouette 0.135 (better internal separation) · NMI 0.031 · ARI 0.026 (weaker alignment with real labels).\nMFCC currently wins on label alignment; HuBERT wins on internal cluster separation.",
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/dog-vocalization-classification" }]
+      },
+      {
+        id: "NP-07", name: "Medical Image Encryption Scheme", status: "completed", category: "SECURITY", size: "sm",
+        tagline: "Reproducing a published medical-image encryption scheme from the paper up.",
+        description: "Academic implementation, for a Cryptography course in the 4th year of the Software Engineering degree, of the chaos-map-based image encryption/decryption scheme from Kanso & Ghebleh's paper on medical-image protection (CT, MRI, X-ray).",
+        tech: ["Python", "NumPy", "OpenCV", "scikit-image", "customtkinter (GUI)"],
+        features: [
+          "Block-based chaotic encryption/decryption with configurable block size and round count",
+          "Graphical interface to encrypt, decrypt, and step through the algorithm's rounds visually",
+          "Test suite covering PSNR, MSE, horizontal correlation, NPCR and UACI"
+        ],
+        results: "Reproduced the scheme's statistical security tests (PSNR/MSE/correlation, NPCR/UACI) across multiple block sizes (1×1, 8×8, 16×16) on real MRI test images.",
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/CifradoImagenesMedicas" }]
+      },
+      {
+        id: "NP-09", name: "SeñasLive", status: "in-development", category: "COMPUTER VISION", size: "md",
+        tagline: "The first working slice of a sign-language recognition platform — camera to prediction, no gaps.",
+        description: "An early-stage sign-language recognition platform. What exists today is a real, working end-to-end slice: hand-landmark capture in the browser, WebSocket streaming to a FastAPI backend, and a rule-based geometric classifier — deliberately built with clean architecture so the classifier can later be swapped for a trained ML model without touching the rest of the system.",
+        tech: ["React + Vite + TypeScript", "MediaPipe Tasks Vision", "WebSocket", "FastAPI", "Python"],
+        features: [
+          "Domain layer fully decoupled from FastAPI and MediaPipe specifics, behind a SignClassifier interface",
+          "Recognizes 7 static hand poses today via geometric rules — no ML model yet, by design, so the pipeline works end-to-end before the dataset exists",
+          "Live camera view with landmark skeleton overlay, real-time prediction, and a latency/FPS panel",
+          "Explicit roadmap: labeled landmark dataset → PyTorch/ONNX classifier → temporal sequences (LSTM) → gloss-to-text translation layer"
+        ],
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/senaslive" }]
+      },
+      {
+        id: "NP-10", name: "uvlhub_practicas", status: "archived", category: "OTHER", size: "sm",
+        tagline: "Coursework practice on the open-source uvlhub.io feature-model repository.",
+        description: "A practice repository tied to the DiversoLab uvlhub.io project — a repository of feature models in UVL format integrated with Zenodo and flamapy, developed for coursework rather than as an independent project.",
+        tech: ["[CONTENT NEEDED — stack inherited from the upstream uvlhub.io project]"],
+        features: ["Coursework practice repository, not an independent build"],
+        links: [{ label: "GitHub", url: "https://github.com/norapfr/uvlhub_practicas" }]
+      }
+    ];
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalContent" role="dialog" aria-modal="true"></div>
-</div>
+    const SKILLS = [
+      { title: "Programming", items: ["Java", "Python", "TypeScript", "JavaScript", "C++"] },
+      { title: "ML / AI", items: ["PyTorch", "TensorFlow / Keras", "scikit-learn", "HuggingFace Transformers", "BERT", "SBERT", "NLP", "Deep Learning", "Reinforcement Learning", "LangChain", "Prompt Engineering", "CNNs", "RNNs / LSTM / GRU", "Transformers", "Attention Mechanisms"] },
+      { title: "Computer Vision", items: ["YOLOv8", "ByteTrack", "MLflow"] },
+      { title: "Web / Backend", items: ["Angular", "React", "Spring Boot", "Node.js", "REST APIs", "Hibernate / JPA"] },
+      { title: "Data", items: ["Pandas", "NumPy", "SQL", "MySQL", "PostgreSQL", "EDA", "Feature Engineering"] },
+      { title: "Software Engineering Practices", items: ["OOP", "Design Patterns", "SOLID Principles", "Unit Testing", "Integration Testing", "PyTest", "JUnit", "Mockito", "Clean Code", "Code Review", "Debugging", "Agile / Scrum"] },
+      { title: "Tools & DevOps", items: ["Git", "Docker", "Linux Bash / Scripting", "FastAPI", "Postman", "Swagger", "CI/CD (GitHub Actions)", "Jira", "SonarQube", "GitLab", "GitHub", "VS Code", "IntelliJ IDEA"] },
+      { title: "Spoken Languages", items: ["Spanish (native)", "English (B2 — Trinity)"] }
+    ];
 
-<script>
-/* =====================================================================
-   data/projects.ts (equivalent) — single source of truth for the
-   mission grid. Decoupled from any live GitHub call so the page keeps
-   working even if GitHub is unreachable. `metrics` are author-reported
-   numbers turned into inline bars; `images` (dog-vocalization only)
-   are real result figures hotlinked from the repo itself.
-   Sourced from: github.com/norapfr public repositories, August 2026.
-===================================================================== */
-const PROJECTS = [
-  {
-    id: "NP-01", name: "VolleyVision AI", status: "completed", category: "COMPUTER VISION", size: "lg",
-    tagline: "Volleyball match footage in, tactical scouting report out.",
-    description: "End-to-end computer vision pipeline for volleyball tactical analysis and scouting, built from scratch with no prior CV experience. Detects players and ball per frame (YOLOv8), tracks individual players across frames (ByteTrack), classifies six tactical events, and turns match footage into heatmaps, event timelines, and exportable PDF scouting reports.",
-    tech: ["Python 3.11","YOLOv8 (Ultralytics)","ByteTrack","PyTorch 2.1","OpenCV","Streamlit + Plotly","scikit-learn (PCA/K-Means/KNN)","FastAPI","MLflow","Docker","GitHub Actions","HuggingFace Hub / Spaces","Render"],
-    features: [
-      "Phase 1 — Player & ball detection (YOLOv8) + multi-object tracking (ByteTrack)",
-      "Phase 2 — Event classification (serve, attack, block, reception, setting, defense) via 2-stage training: base pass on a 25,000-image dataset, then multi-angle fine-tuning",
-      "Phase 3 — Streamlit dashboard: heatmaps, event timeline, stats, PDF report export",
-      "Phase 4 — Scouting ML: zone and individual player tactical profiles via PCA + K-Means + KNN",
-      "Phase 5 — MLOps: REST API (FastAPI), Docker, MLflow tracking, CI/CD, models published to HuggingFace Hub"
-    ],
-    metrics: [ {label:"Event mAP50", value:97.1}, {label:"Precision", value:97.2}, {label:"Recall", value:96.8} ],
-    results: "Event classification (test set): precision 0.972 · recall 0.968 · mAP50 0.971 · mAP50-95 0.881 across all 6 classes.\nDetection (val set): precision 0.728 · recall 0.825 · mAP50 0.861 (players + ball).",
-    links: [
-      {label:"GitHub", url:"https://github.com/norapfr/volleyvision-ai"},
-      {label:"Live demo (HF Spaces)", url:"https://huggingface.co/spaces/norapfr/volleyvision-ai"},
-      {label:"Live demo (Render)", url:"https://volleyvision-ai.onrender.com"},
-      {label:"Models (HF Hub)", url:"https://huggingface.co/norapfr/volleyvision-models"}
-    ]
-  },
-  {
-    id: "NP-02", name: "SocialMindScan — Bachelor's Thesis", status: "completed", category: "NLP", size: "lg",
-    tagline: "Can Reddit text flag depression and suicidal ideation early — and how well?",
-    description: "Bachelor's thesis (Universidad de Sevilla, graded 10/10) building a system to detect depression and suicidal ideation in Reddit text. Benchmarks 5 classical ML models against 6 neural architectures across 7 text representations (TF-IDF, Word2Vec, BERT, RoBERTa, SBERT), with over 60 model×representation configurations systematically evaluated and compared against published state of the art.",
-    tech: ["Python 3.11","scikit-learn","Optuna","NLTK","spaCy","Gensim (Word2Vec)","HuggingFace Transformers (BERT / RoBERTa / SBERT)"],
-    features: [
-      "Two independent, balanced datasets: 88,585 posts (depression) and 73,729 posts (suicide), combining public datasets with the author's own Reddit API scraping",
-      "Preprocessing: character-repetition normalization, NER removal (spaCy), negation-aware stopword filtering, contraction expansion, lemmatization + POS tagging",
-      "60+ model × representation combinations benchmarked with grid search / Optuna hyperparameter tuning",
-      "Systematic comparison against 4 published baselines (Turcan & McKeown, Pirina & Çöltekin, Yeskuatov et al., Haque et al.)"
-    ],
-    metrics: [ {label:"F1 Suicide (SVM+TF-IDF)", value:90.9}, {label:"F1 Depression (best)", value:88.6} ],
-    results: "Suicidal ideation: F1 0.909 (SVM + TF-IDF) · F1 0.900 (CNN + BERT).\nDepression: F1 0.886 (Logistic Regression/SVM + TF-IDF and BiGRU + Word2Vec).\nExceeds reported literature baselines, e.g. Turcan & McKeown F1 0.807; Pirina & Çöltekin F1 0.55–0.64.",
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/SocialMindScan"} ]
-  },
-  {
-    id: "NP-04", name: "ATMOSPHERICA", status: "completed", category: "DATA", size: "md",
-    tagline: "Seville's weather, painted daily — with a model guessing tomorrow's extremes.",
-    description: "A real-time atmospheric data pipeline that turns live weather and air-quality readings for Seville into a deterministic generative painting, while a Random Forest model predicts the probability of an extreme weather event the next day. Every shape, colour, and warning mark in the artwork is traceable to a real atmospheric variable, and the gallery publishes itself automatically to GitHub Pages.",
-    tech: ["Python 3.11","pandas / NumPy","scikit-learn","PyTorch","SHAP","xarray / netCDF4 / cdsapi","HTML5 Canvas","JavaScript","Playwright","GitHub Actions","GitHub Pages"],
-    features: [
-      "Visual grammar mapping 7 atmospheric variables (temperature, wind, humidity, pressure, cloud cover, PM2.5, rain) to concrete shapes and colours",
-      "Random Forest extreme-event classifier trained on ERA5 reanalysis data (1940–1990 baseline + 2010–2024 contemporary regime)",
-      "Graduated risk visualization: 5 threshold tiers baked directly into the artwork as it's generated",
-      "Fully automated: daily fetch, generation, PNG export via Playwright, and Pages deploy through GitHub Actions"
-    ],
-    metrics: [ {label:"ROC-AUC (Random Forest)", value:83.6}, {label:"ROC-AUC (LSTM baseline)", value:67.8} ],
-    results: "Random Forest: mean ROC-AUC 0.836 (vs. LSTM baseline 0.678) on a 5% event-rate imbalanced problem.\nTop predictive features by SHAP: minimum pressure, maximum temperature, seasonality (cos of day-of-year).",
-    links: [
-      {label:"GitHub", url:"https://github.com/norapfr/atmospherica"},
-      {label:"Live exhibition", url:"https://norapfr.github.io/atmospherica"}
-    ]
-  },
-  {
-    id: "NP-03", name: "SocialMind_APP", status: "completed", category: "WEB", size: "sm",
-    tagline: "Turning the thesis models into something a person could actually use.",
-    description: "Full-stack Django application that puts the SocialMindScan thesis models in front of a real user: a private space to write or upload personal text, track AI-generated risk signals over time, and talk to a context-aware supportive chatbot.",
-    tech: ["Python","Django 5","HTML templates","JavaScript","SQLite / Django ORM","TensorFlow","PyTorch","BERT","HuggingFace"],
-    features: [
-      "Runs 6 trained CNN and GRU models using Word2Vec and BERT representations",
-      "Post history, trend view, and labels so results are easy to follow over time",
-      "Two chatbot modes — remote inference and local inference",
-      "Authentication, async endpoints, and configurable AI backends"
-    ],
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/SocialMind_APP"} ]
-  },
-  {
-    id: "NP-05", name: "LunarEntorno — RL Agent (DQN)", status: "completed", category: "MACHINE LEARNING", size: "sm",
-    tagline: "Teaching a lander to land itself, one replayed experience at a time.",
-    description: "A Deep Q-Network reinforcement learning agent trained to solve OpenAI Gym's LunarLander environment, using experience replay and target networks to stabilize training.",
-    tech: ["Python","Deep Q-Network (DQN)","Experience replay","Target networks"],
-    features: [
-      "Custom DQN implementation with a dedicated training script and notebook",
-      "Multiple saved model checkpoints tracking progress across training iterations",
-      "Written reports documenting the reinforcement-learning approach"
-    ],
-    metrics: [ {label:"Successful landings", value:85} ],
-    results: "85% successful landing rate across evaluation episodes, as reported by the author.",
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/LunarEntorno"} ]
-  },
-  {
-    id: "NP-06", name: "Dog Vocalization Classification", status: "in-development", category: "DATA", size: "sm",
-    tagline: "Do dog barks cluster into a vocabulary on their own — without being told the labels?",
-    description: "A research project testing whether an unsupervised acoustic vocabulary of dog vocalizations emerges from clustering alone, comparing a classical representation (MFCC) against a deep audio embedding (HuBERT) and using real labels only afterward, as an auditing tool rather than a training signal.",
-    tech: ["Python","MFCC audio features","HuBERT embeddings","Clustering","NMI / ARI / Silhouette / purity metrics"],
-    features: [
-      "20,138 audio segments processed — 91 dogs, 14 labels, 417 minutes of material",
-      "Four-stage pipeline: exploratory data analysis → MFCC experiment → HuBERT experiment → comparison",
-      "Labels deliberately withheld from the clustering step, used only afterward to interpret the discovered clusters"
-    ],
-    images: [
-      {src:"https://raw.githubusercontent.com/norapfr/dog-vocalization-classification/main/results/figures/comparacion_mfcc_vs_hubert.png", cap:"MFCC vs HuBERT — comparison"},
-      {src:"https://raw.githubusercontent.com/norapfr/dog-vocalization-classification/main/results/figures/tsne_prueba_2_hubert.png", cap:"t-SNE projection — HuBERT"}
-    ],
-    results: "Interim results — project still in progress.\nMFCC: Silhouette 0.067 · NMI 0.086 · ARI 0.060 · purity 0.458.\nHuBERT: Silhouette 0.135 (better internal separation) · NMI 0.031 · ARI 0.026 (weaker alignment with real labels).\nMFCC currently wins on label alignment; HuBERT wins on internal cluster separation.",
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/dog-vocalization-classification"} ]
-  },
-  {
-    id: "NP-07", name: "Medical Image Encryption Scheme", status: "completed", category: "SECURITY", size: "sm",
-    tagline: "Reproducing a published medical-image encryption scheme from the paper up.",
-    description: "Academic implementation, for a Cryptography course in the 4th year of the Software Engineering degree, of the chaos-map-based image encryption/decryption scheme from Kanso & Ghebleh's paper on medical-image protection (CT, MRI, X-ray).",
-    tech: ["Python","NumPy","OpenCV","scikit-image","customtkinter (GUI)"],
-    features: [
-      "Block-based chaotic encryption/decryption with configurable block size and round count",
-      "Graphical interface to encrypt, decrypt, and step through the algorithm's rounds visually",
-      "Test suite covering PSNR, MSE, horizontal correlation, NPCR and UACI"
-    ],
-    results: "Reproduced the scheme's statistical security tests (PSNR/MSE/correlation, NPCR/UACI) across multiple block sizes (1×1, 8×8, 16×16) on real MRI test images.",
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/CifradoImagenesMedicas"} ]
-  },
-  {
-    id: "NP-09", name: "SeñasLive", status: "in-development", category: "COMPUTER VISION", size: "md",
-    tagline: "The first working slice of a sign-language recognition platform — camera to prediction, no gaps.",
-    description: "An early-stage sign-language recognition platform. What exists today is a real, working end-to-end slice: hand-landmark capture in the browser, WebSocket streaming to a FastAPI backend, and a rule-based geometric classifier — deliberately built with clean architecture so the classifier can later be swapped for a trained ML model without touching the rest of the system.",
-    tech: ["React + Vite + TypeScript","MediaPipe Tasks Vision","WebSocket","FastAPI","Python"],
-    features: [
-      "Domain layer fully decoupled from FastAPI and MediaPipe specifics, behind a SignClassifier interface",
-      "Recognizes 7 static hand poses today via geometric rules — no ML model yet, by design, so the pipeline works end-to-end before the dataset exists",
-      "Live camera view with landmark skeleton overlay, real-time prediction, and a latency/FPS panel",
-      "Explicit roadmap: labeled landmark dataset → PyTorch/ONNX classifier → temporal sequences (LSTM) → gloss-to-text translation layer"
-    ],
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/senaslive"} ]
-  },
-  {
-    id: "NP-10", name: "uvlhub_practicas", status: "archived", category: "OTHER", size: "sm",
-    tagline: "Coursework practice on the open-source uvlhub.io feature-model repository.",
-    description: "A practice repository tied to the DiversoLab uvlhub.io project — a repository of feature models in UVL format integrated with Zenodo and flamapy, developed for coursework rather than as an independent project.",
-    tech: ["[CONTENT NEEDED — stack inherited from the upstream uvlhub.io project]"],
-    features: [ "Coursework practice repository, not an independent build" ],
-    links: [ {label:"GitHub", url:"https://github.com/norapfr/uvlhub_practicas"} ]
-  }
-];
+    const STATUS_LABEL = { completed: "Completed", "in-development": "In development", archived: "Archived" };
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const SKILLS = [
-  {title:"Programming", items:["Java","Python","TypeScript","JavaScript","C++"]},
-  {title:"ML / AI", items:["PyTorch","TensorFlow / Keras","scikit-learn","HuggingFace Transformers","BERT","SBERT","NLP","Deep Learning","Reinforcement Learning","LangChain","Prompt Engineering","CNNs","RNNs / LSTM / GRU","Transformers","Attention Mechanisms"]},
-  {title:"Computer Vision", items:["YOLOv8","ByteTrack","MLflow"]},
-  {title:"Web / Backend", items:["Angular","React","Spring Boot","Node.js","REST APIs","Hibernate / JPA"]},
-  {title:"Data", items:["Pandas","NumPy","SQL","MySQL","PostgreSQL","EDA","Feature Engineering"]},
-  {title:"Software Engineering Practices", items:["OOP","Design Patterns","SOLID Principles","Unit Testing","Integration Testing","PyTest","JUnit","Mockito","Clean Code","Code Review","Debugging","Agile / Scrum"]},
-  {title:"Tools & DevOps", items:["Git","Docker","Linux Bash / Scripting","FastAPI","Postman","Swagger","CI/CD (GitHub Actions)","Jira","SonarQube","GitLab","GitHub","VS Code","IntelliJ IDEA"]},
-  {title:"Spoken Languages", items:["Spanish (native)","English (B2 — Trinity)"]}
-];
-
-const STATUS_LABEL = {completed:"Completed", "in-development":"In development", archived:"Archived"};
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ================= boot sequence ================= */
-const bootScript = [
-  {t:"> initializing field-log v2.3...", cls:"dim-tag"},
-  {t:"> loading identity: NORA PEÑALOZA FRIQUI", cls:""},
-  {t:"> connecting to github.com/norapfr ...", cls:"dim-tag"},
-  {t:"> [OK] 9 public repositories indexed", cls:"ok-tag"},
-  {t:"> [OK] 6 completed · 2 in development · 1 archived", cls:"ok-tag"},
-  {t:"> rendering field log...", cls:"dim-tag"}
-];
-const bootEl = document.getElementById('bootLines');
-const bootOverlay = document.getElementById('boot');
-function runBoot(){
-  if(reduceMotion){ bootOverlay.classList.add('hidden'); return; }
-  bootScript.forEach((l,i)=>{
-    const d = document.createElement('div');
-    d.textContent = l.t;
-    if(l.cls) d.className = l.cls;
-    bootEl.appendChild(d);
-    setTimeout(()=>d.classList.add('show'), 120*i + 80);
-  });
-  setTimeout(()=>bootOverlay.classList.add('hidden'), 120*bootScript.length + 550);
-}
-document.getElementById('bootSkip').addEventListener('click', ()=>bootOverlay.classList.add('hidden'));
-runBoot();
-
-/* ================= custom cursor ================= */
-if(window.matchMedia('(hover:hover) and (min-width:901px)').matches){
-  document.body.classList.add('has-cursor');
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRing');
-  let rx=0, ry=0, mx=0, my=0;
-  window.addEventListener('mousemove', e=>{
-    mx=e.clientX; my=e.clientY;
-    dot.style.left = mx+'px'; dot.style.top = my+'px';
-  });
-  function loop(){
-    rx += (mx-rx)*0.18; ry += (my-ry)*0.18;
-    ring.style.left = rx+'px'; ring.style.top = ry+'px';
-    requestAnimationFrame(loop);
-  }
-  loop();
-  document.addEventListener('mouseover', e=>{
-    if(e.target.closest('a,button,.mission-card,.chip.is-clickable,input')) ring.classList.add('ring-hover');
-  });
-  document.addEventListener('mouseout', e=>{
-    if(e.target.closest('a,button,.mission-card,.chip.is-clickable,input')) ring.classList.remove('ring-hover');
-  });
-}
-
-/* ================= role line typing effect ================= */
-const roleEl = document.getElementById('roleLine');
-const roleText = "SOFTWARE ENGINEER — APPLIED ML / NLP";
-if(reduceMotion){
-  roleEl.textContent = roleText;
-} else {
-  let i=0;
-  function typeRole(){
-    if(i<=roleText.length){
-      roleEl.innerHTML = roleText.slice(0,i) + '<span class="cur"></span>';
-      i++;
-      setTimeout(typeRole, 28);
+    /* ================= boot sequence ================= */
+    const bootScript = [
+      { t: "> initializing field-log v2.3...", cls: "dim-tag" },
+      { t: "> loading identity: NORA PEÑALOZA FRIQUI", cls: "" },
+      { t: "> connecting to github.com/norapfr ...", cls: "dim-tag" },
+      { t: "> [OK] 10 public repositories indexed", cls: "ok-tag" },
+      { t: "> [OK] 7 completed · 2 in development · 1 archived", cls: "ok-tag" },
+      { t: "> rendering field log...", cls: "dim-tag" }
+    ];
+    const bootEl = document.getElementById('bootLines');
+    const bootOverlay = document.getElementById('boot');
+    function runBoot() {
+      if (reduceMotion) { bootOverlay.classList.add('hidden'); return; }
+      bootScript.forEach((l, i) => {
+        const d = document.createElement('div');
+        d.textContent = l.t;
+        if (l.cls) d.className = l.cls;
+        bootEl.appendChild(d);
+        setTimeout(() => d.classList.add('show'), 120 * i + 80);
+      });
+      setTimeout(() => bootOverlay.classList.add('hidden'), 120 * bootScript.length + 550);
     }
-  }
-  setTimeout(typeRole, 900);
-}
+    document.getElementById('bootSkip').addEventListener('click', () => bootOverlay.classList.add('hidden'));
+    runBoot();
 
-/* ================= clock ================= */
-const clockEl = document.getElementById('clock');
-function tickClock(){
-  const now = new Date();
-  const s = now.toLocaleTimeString('en-GB', {timeZone:'Europe/Madrid', hour12:false});
-  clockEl.textContent = 'SEVILLE ' + s;
-}
-tickClock(); setInterval(tickClock, 1000);
-
-/* footer sync stamp */
-document.getElementById('footSync').textContent = '· Last opened ' + new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-
-/* ================= section title decode effect ================= */
-const DECODE_CHARS = "!<>-_\\/[]{}—=+*^?#";
-function decodeText(el){
-  const final = el.getAttribute('data-decode');
-  if(!final || reduceMotion){ return; }
-  let frame = 0;
-  const totalFrames = 18;
-  function render(){
-    let out = "";
-    for(let c=0;c<final.length;c++){
-      if(final[c]===' '){ out+=' '; continue; }
-      const revealAt = (c/final.length)*totalFrames;
-      out += frame >= revealAt ? final[c] : DECODE_CHARS[Math.floor(Math.random()*DECODE_CHARS.length)];
+    /* ================= custom cursor ================= */
+    if (window.matchMedia('(hover:hover) and (min-width:901px)').matches) {
+      document.body.classList.add('has-cursor');
+      const dot = document.getElementById('cursorDot');
+      const ring = document.getElementById('cursorRing');
+      let rx = 0, ry = 0, mx = 0, my = 0;
+      window.addEventListener('mousemove', e => {
+        mx = e.clientX; my = e.clientY;
+        dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+      });
+      function loop() {
+        rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+        ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+        requestAnimationFrame(loop);
+      }
+      loop();
+      document.addEventListener('mouseover', e => {
+        if (e.target.closest('a,button,.mission-card,.chip.is-clickable,input')) ring.classList.add('ring-hover');
+      });
+      document.addEventListener('mouseout', e => {
+        if (e.target.closest('a,button,.mission-card,.chip.is-clickable,input')) ring.classList.remove('ring-hover');
+      });
     }
-    el.textContent = out;
-    frame++;
-    if(frame<=totalFrames+4) requestAnimationFrame(render);
-    else el.textContent = final;
-  }
-  render();
-}
-const decodeTargets = document.querySelectorAll('[data-decode]');
-const decodeObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){ decodeText(entry.target); decodeObserver.unobserve(entry.target); }
-  });
-}, {threshold:0.6});
-decodeTargets.forEach(el=>decodeObserver.observe(el));
 
-/* ================= reveal on scroll ================= */
-const revealObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){ entry.target.classList.add('in'); revealObserver.unobserve(entry.target); }
-  });
-}, {threshold:0.12});
-document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+    /* ================= role line typing effect ================= */
+    const roleEl = document.getElementById('roleLine');
+    const roleText = "SOFTWARE ENGINEER — APPLIED ML / NLP";
+    if (reduceMotion) {
+      roleEl.textContent = roleText;
+    } else {
+      let i = 0;
+      function typeRole() {
+        if (i <= roleText.length) {
+          roleEl.innerHTML = roleText.slice(0, i) + '<span class="cur"></span>';
+          i++;
+          setTimeout(typeRole, 28);
+        }
+      }
+      setTimeout(typeRole, 900);
+    }
 
-/* ================= mission grid ================= */
-const grid = document.getElementById('missionGrid');
-const categories = ["ALL", ...Array.from(new Set(PROJECTS.map(p=>p.category)))];
-const filtersEl = document.getElementById('filters');
-let activeFilter = "ALL";
+    /* ================= clock ================= */
+    const clockEl = document.getElementById('clock');
+    function tickClock() {
+      const now = new Date();
+      const s = now.toLocaleTimeString('en-GB', { timeZone: 'Europe/Madrid', hour12: false });
+      clockEl.textContent = 'SEVILLE ' + s;
+    }
+    tickClock(); setInterval(tickClock, 1000);
 
-function renderFilters(){
-  filtersEl.innerHTML = "";
-  categories.forEach(cat=>{
-    const b = document.createElement('button');
-    b.className = "filter-btn" + (cat===activeFilter ? " active" : "");
-    b.textContent = cat;
-    b.setAttribute('aria-pressed', cat===activeFilter);
-    b.addEventListener('click', ()=>{ activeFilter = cat; renderFilters(); renderGrid(); });
-    filtersEl.appendChild(b);
-  });
-}
+    /* footer sync stamp */
+    document.getElementById('footSync').textContent = '· Last opened ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-const SEG_COUNT = 20;
-function metricsHtml(p){
-  if(!p.metrics) return "";
-  return `<div class="mission-metrics">` + p.metrics.map(m=>{
-    const filled = Math.round((Math.min(100,m.value)/100)*SEG_COUNT);
-    let segs = "";
-    for(let s=0;s<SEG_COUNT;s++){ segs += `<span class="metric-seg" data-seg="${s}" data-filled="${s<filled?1:0}"></span>`; }
-    return `
+    /* ================= section title decode effect ================= */
+    const DECODE_CHARS = "!<>-_\\/[]{}—=+*^?#";
+    function decodeText(el) {
+      const final = el.getAttribute('data-decode');
+      if (!final || reduceMotion) { return; }
+      let frame = 0;
+      const totalFrames = 18;
+      function render() {
+        let out = "";
+        for (let c = 0; c < final.length; c++) {
+          if (final[c] === ' ') { out += ' '; continue; }
+          const revealAt = (c / final.length) * totalFrames;
+          out += frame >= revealAt ? final[c] : DECODE_CHARS[Math.floor(Math.random() * DECODE_CHARS.length)];
+        }
+        el.textContent = out;
+        frame++;
+        if (frame <= totalFrames + 4) requestAnimationFrame(render);
+        else el.textContent = final;
+      }
+      render();
+    }
+    const decodeTargets = document.querySelectorAll('[data-decode]');
+    const decodeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { decodeText(entry.target); decodeObserver.unobserve(entry.target); }
+      });
+    }, { threshold: 0.6 });
+    decodeTargets.forEach(el => decodeObserver.observe(el));
+
+    /* ================= reveal on scroll ================= */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { entry.target.classList.add('in'); revealObserver.unobserve(entry.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* ================= mission grid ================= */
+    const grid = document.getElementById('missionGrid');
+    const categories = ["ALL", ...Array.from(new Set(PROJECTS.map(p => p.category)))];
+    const filtersEl = document.getElementById('filters');
+    let activeFilter = "ALL";
+
+    function renderFilters() {
+      filtersEl.innerHTML = "";
+      categories.forEach(cat => {
+        const b = document.createElement('button');
+        b.className = "filter-btn" + (cat === activeFilter ? " active" : "");
+        b.textContent = cat;
+        b.setAttribute('aria-pressed', cat === activeFilter);
+        b.addEventListener('click', () => { activeFilter = cat; renderFilters(); renderGrid(); });
+        filtersEl.appendChild(b);
+      });
+    }
+
+    const SEG_COUNT = 20;
+    function metricsHtml(p) {
+      if (!p.metrics) return "";
+      return `<div class="mission-metrics">` + p.metrics.map(m => {
+        const filled = Math.round((Math.min(100, m.value) / 100) * SEG_COUNT);
+        let segs = "";
+        for (let s = 0; s < SEG_COUNT; s++) { segs += `<span class="metric-seg" data-seg="${s}" data-filled="${s < filled ? 1 : 0}"></span>`; }
+        return `
     <div class="metric-row">
       <div class="metric-row-top">
         <span class="metric-label">${m.label}</span>
@@ -903,19 +1913,19 @@ function metricsHtml(p){
       </div>
       <span class="metric-segbar">${segs}</span>
     </div>`;
-  }).join('') + `</div>`;
-}
+      }).join('') + `</div>`;
+    }
 
-function renderGrid(){
-  grid.innerHTML = "";
-  const list = activeFilter==="ALL" ? PROJECTS : PROJECTS.filter(p=>p.category===activeFilter);
-  list.forEach(p=>{
-    const card = document.createElement('div');
-    card.className = "mission-card size-" + (p.size||"sm");
-    card.tabIndex = 0;
-    card.setAttribute('role','button');
-    card.setAttribute('aria-label', 'Open mission details: ' + p.name);
-    card.innerHTML = `
+    function renderGrid() {
+      grid.innerHTML = "";
+      const list = activeFilter === "ALL" ? PROJECTS : PROJECTS.filter(p => p.category === activeFilter);
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "mission-card size-" + (p.size || "sm");
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', 'Open mission details: ' + p.name);
+        card.innerHTML = `
       <div class="mission-top">
         <span class="mission-id">${p.id}</span>
         <span class="status-pill ${p.status}">${STATUS_LABEL[p.status]}</span>
@@ -928,45 +1938,45 @@ function renderGrid(){
         <span class="view-affordance">View dossier →</span>
       </div>
     `;
-    card.addEventListener('click', ()=>openModal(p));
-    card.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openModal(p);} });
-    grid.appendChild(card);
-  });
-  // animate segmented bars filling in, one block at a time
-  document.querySelectorAll('.metric-segbar').forEach(bar=>{
-    const segs = bar.querySelectorAll('.metric-seg');
-    segs.forEach((seg,i)=>{
-      if(seg.getAttribute('data-filled')==='1'){
-        if(reduceMotion){ seg.classList.add('filled'); }
-        else{ setTimeout(()=>seg.classList.add('filled'), 25*i); }
-      }
-    });
-  });
-}
+        card.addEventListener('click', () => openModal(p));
+        card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(p); } });
+        grid.appendChild(card);
+      });
+      // animate segmented bars filling in, one block at a time
+      document.querySelectorAll('.metric-segbar').forEach(bar => {
+        const segs = bar.querySelectorAll('.metric-seg');
+        segs.forEach((seg, i) => {
+          if (seg.getAttribute('data-filled') === '1') {
+            if (reduceMotion) { seg.classList.add('filled'); }
+            else { setTimeout(() => seg.classList.add('filled'), 25 * i); }
+          }
+        });
+      });
+    }
 
-/* ================= modal ================= */
-const overlay = document.getElementById('modalOverlay');
-const modalContent = document.getElementById('modalContent');
-let lastFocused = null;
+    /* ================= modal ================= */
+    const overlay = document.getElementById('modalOverlay');
+    const modalContent = document.getElementById('modalContent');
+    let lastFocused = null;
 
-function openModal(p){
-  lastFocused = document.activeElement;
-  const linksHtml = p.links.map(l=>`<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join('');
-  const techHtml = p.tech.map(t=>`<span class="chip">${t}</span>`).join('');
-  const featHtml = p.features.map(f=>`<li>${f}</li>`).join('');
-  const imagesHtml = p.images ? `
+    function openModal(p) {
+      lastFocused = document.activeElement;
+      const linksHtml = p.links.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join('');
+      const techHtml = p.tech.map(t => `<span class="chip">${t}</span>`).join('');
+      const featHtml = p.features.map(f => `<li>${f}</li>`).join('');
+      const imagesHtml = p.images ? `
     <div class="modal-section">
       <div class="modal-label">Visual evidence — real result figures from the repo</div>
       <div class="evidence-grid">
-        ${p.images.map(im=>`<div><img src="${im.src}" alt="${im.cap}" loading="lazy"><div class="evidence-cap">${im.cap}</div></div>`).join('')}
+        ${p.images.map(im => `<div><img src="${im.src}" alt="${im.cap}" loading="lazy"><div class="evidence-cap">${im.cap}</div></div>`).join('')}
       </div>
     </div>` : "";
-  const resultsHtml = p.results ? `
+      const resultsHtml = p.results ? `
     <div class="modal-section">
       <div class="modal-label">Results</div>
-      <div class="results-box">${p.results.replace(/\n/g,'<br>')}</div>
+      <div class="results-box">${p.results.replace(/\n/g, '<br>')}</div>
     </div>` : "";
-  modalContent.innerHTML = `
+      modalContent.innerHTML = `
     <button class="modal-close" id="modalCloseBtn" aria-label="Close">✕</button>
     <div class="modal-id">${p.id} · ${p.category} · <span class="status-pill ${p.status}" style="margin-left:4px;">${STATUS_LABEL[p.status]}</span></div>
     <div class="modal-title">${p.name}</div>
@@ -991,254 +2001,255 @@ function openModal(p){
 
     <div class="modal-links">${linksHtml}</div>
   `;
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-  document.getElementById('modalCloseBtn').focus();
-}
-
-function closeModal(){
-  overlay.classList.remove('open');
-  document.body.style.overflow = '';
-  if(lastFocused) lastFocused.focus();
-}
-
-overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay.classList.contains('open')) closeModal(); });
-
-/* ================= skills ================= */
-const skillsGrid = document.getElementById('skillsGrid');
-SKILLS.forEach(group=>{
-  const div = document.createElement('div');
-  div.className = "skill-group";
-  div.innerHTML = `<div class="skill-group-title">${group.title}</div><div class="chip-row">${group.items.map(i=>`<span class="chip is-clickable" data-skill="${i}">${i}</span>`).join('')}</div>`;
-  skillsGrid.appendChild(div);
-});
-skillsGrid.addEventListener('click', (e)=>{
-  const chip = e.target.closest('[data-skill]');
-  if(!chip) return;
-  const skill = chip.getAttribute('data-skill').toLowerCase();
-  const hit = PROJECTS.find(p=>p.tech.some(t=>t.toLowerCase().includes(skill)));
-  if(hit){ document.getElementById('missions').scrollIntoView({behavior: reduceMotion?'auto':'smooth'}); setTimeout(()=>openModal(hit), reduceMotion?0:450); }
-});
-
-/* ================= stats count-up ================= */
-function animateCount(el){
-  const target = parseInt(el.getAttribute('data-count'), 10);
-  if(reduceMotion){ el.textContent = target; return; }
-  const dur = 900;
-  const start = performance.now();
-  function tick(now){
-    const p = Math.min(1, (now-start)/dur);
-    el.textContent = Math.round(target * (1 - Math.pow(1-p, 3)));
-    if(p<1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-const statObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){ animateCount(entry.target); statObserver.unobserve(entry.target); }
-  });
-}, {threshold:0.4});
-document.querySelectorAll('.stat-num').forEach(el=>statObserver.observe(el));
-
-/* ================= interactive terminal console ================= */
-const termOutput = document.getElementById('termOutput');
-const termInput = document.getElementById('termInput');
-
-function termPrint(text, cls){
-  const d = document.createElement('div');
-  d.className = 'line' + (cls ? ' '+cls : '');
-  d.textContent = text;
-  termOutput.appendChild(d);
-  termOutput.scrollTop = termOutput.scrollHeight;
-}
-function termEcho(cmd){
-  const d = document.createElement('div');
-  d.className = 'line prompt-echo';
-  d.textContent = cmd;
-  termOutput.appendChild(d);
-  termOutput.scrollTop = termOutput.scrollHeight;
-}
-
-function listMissions(filterCat){
-  const list = filterCat ? PROJECTS.filter(p=>p.category.toLowerCase()===filterCat.toLowerCase()) : PROJECTS;
-  if(!list.length){ termPrint(`no missions found for "${filterCat}"`, 'err'); return; }
-  list.forEach(p=>termPrint(`  ${p.id}  [${STATUS_LABEL[p.status].toUpperCase()}]  ${p.name}`));
-}
-
-function findMission(query){
-  query = query.toLowerCase().trim();
-  return PROJECTS.find(p => p.id.toLowerCase()===query || p.name.toLowerCase().includes(query));
-}
-
-const TERM_COMMANDS = {
-  help(){
-    termPrint("available commands:");
-    termPrint("  help                  show this list");
-    termPrint("  ls                    list all missions");
-    termPrint("  ls <category>         list missions in a category, e.g. ls nlp");
-    termPrint("  open <id|name>        open a mission dossier, e.g. open NP-01 / open volleyvision");
-    termPrint("  filter <category>     apply a category filter to the grid below");
-    termPrint("  categories            list available categories");
-    termPrint("  stats                 show mission counts");
-    termPrint("  about                 who is Nora");
-    termPrint("  contact               contact info");
-    termPrint("  clear                 clear this console");
-  },
-  ls(arg){ listMissions(arg); },
-  categories(){ termPrint(categories.filter(c=>c!=="ALL").join(', ')); },
-  open(arg){
-    if(!arg){ termPrint("usage: open <mission id or name>", 'err'); return; }
-    const m = findMission(arg);
-    if(!m){ termPrint(`mission not found: "${arg}" — try 'ls'`, 'err'); return; }
-    termPrint(`opening dossier: ${m.name}...`, 'ok-line');
-    document.getElementById('missions').scrollIntoView({behavior: reduceMotion?'auto':'smooth'});
-    setTimeout(()=>openModal(m), reduceMotion?0:400);
-  },
-  filter(arg){
-    if(!arg){ termPrint("usage: filter <category>  (or 'filter all')", 'err'); return; }
-    const match = categories.find(c=>c.toLowerCase()===arg.toLowerCase());
-    if(!match){ termPrint(`unknown category: "${arg}" — try 'categories'`, 'err'); return; }
-    activeFilter = match; renderFilters(); renderGrid();
-    termPrint(`filter applied: ${match}`, 'ok-line');
-  },
-  stats(){
-    termPrint("TOTAL 9 · COMPLETED 6 · IN DEVELOPMENT 2 · ARCHIVED 1", 'accent-line');
-  },
-  about(){
-    termPrint("Nora Peñaloza Friqui — software engineer (NTT DATA) and applied ML/NLP researcher.");
-    termPrint("Based in Seville, Spain. B.Sc. Computer Engineering, Universidad de Sevilla.");
-    termPrint("Bachelor's thesis on AI for mental health, graded 10/10. Open to SWE / ML-NLP roles.");
-  },
-  contact(){
-    termPrint("email: npenfriq23@gmail.com");
-    termPrint("linkedin: linkedin.com/in/nora-peñaloza-friqui-79879b351");
-    termPrint("github: github.com/norapfr");
-  },
-  clear(){ termOutput.innerHTML = ""; }
-};
-
-function runCommand(raw){
-  const trimmed = raw.trim();
-  if(!trimmed) return;
-  termEcho(trimmed);
-  const [cmdRaw, ...rest] = trimmed.split(/\s+/);
-  const cmd = cmdRaw.toLowerCase();
-  const arg = rest.join(' ');
-  if(TERM_COMMANDS[cmd]){ TERM_COMMANDS[cmd](arg); }
-  else { termPrint(`command not found: "${cmd}" — type 'help'`, 'err'); }
-}
-
-termPrint("field-log terminal v2.3 — type 'help' to see available commands", 'accent-line');
-termInput.addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){ runCommand(termInput.value); termInput.value=''; }
-});
-document.addEventListener('keydown', (e)=>{
-  if(e.key==='/' && document.activeElement!==termInput){ e.preventDefault(); termInput.focus(); }
-});
-
-renderFilters();
-renderGrid();
-
-/* ================= mascot: pixel field-bot that wanders the page ================= */
-(function(){
-  const mascotEl = document.getElementById('mascot');
-  const spriteEl = document.getElementById('mascotSprite');
-  const bubbleEl = document.getElementById('mascotBubble');
-  if(!mascotEl) return;
-
-  const FRAME_W = 48;
-  const FRAME_COUNT = 4;
-  const SPRITE_W = 48;
-
-  let x = Math.max(20, window.innerWidth * 0.15);
-  let dir = 1;              // 1 = right, -1 = left
-  let speed = 0;            // px per frame, eased in/out
-  let state = 'idle';       // idle | walking
-  let stateTimer = 0;
-  let frame = 0;
-  let frameTimer = 0;
-  let lastTs = null;
-
-  const QUIPS = [
-    "9 missions logged.",
-    "F1 0.909 and counting.",
-    "Scanning for bugs...",
-    "Field log secure.",
-    "Coffee.exe not found.",
-    "Recompiling curls...",
-    "New badge unlocked: curious visitor.",
-    "Don't mind me, just patrolling."
-  ];
-
-  function setFrame(i){ spriteEl.style.backgroundPosition = (-i*FRAME_W) + 'px 0'; }
-
-  function pickNextState(){
-    if(state === 'idle'){
-      state = 'walking';
-      dir = Math.random() < 0.5 ? -1 : 1;
-      stateTimer = 1800 + Math.random()*2600;
-    } else {
-      state = 'idle';
-      stateTimer = 1200 + Math.random()*2200;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+      document.getElementById('modalCloseBtn').focus();
     }
-  }
-  pickNextState();
 
-  function tick(ts){
-    if(lastTs === null) lastTs = ts;
-    const dt = Math.min(48, ts - lastTs);
-    lastTs = ts;
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      if (lastFocused) lastFocused.focus();
+    }
 
-    stateTimer -= dt;
-    if(stateTimer <= 0) pickNextState();
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
 
-    const targetSpeed = state === 'walking' ? 0.052 : 0;
-    speed += (targetSpeed - speed) * 0.06;
+    /* ================= skills ================= */
+    const skillsGrid = document.getElementById('skillsGrid');
+    SKILLS.forEach(group => {
+      const div = document.createElement('div');
+      div.className = "skill-group";
+      div.innerHTML = `<div class="skill-group-title">${group.title}</div><div class="chip-row">${group.items.map(i => `<span class="chip is-clickable" data-skill="${i}">${i}</span>`).join('')}</div>`;
+      skillsGrid.appendChild(div);
+    });
+    skillsGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-skill]');
+      if (!chip) return;
+      const skill = chip.getAttribute('data-skill').toLowerCase();
+      const hit = PROJECTS.find(p => p.tech.some(t => t.toLowerCase().includes(skill)));
+      if (hit) { document.getElementById('missions').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(() => openModal(hit), reduceMotion ? 0 : 450); }
+    });
 
-    if(Math.abs(speed) > 0.002){
-      x += dir * speed * dt;
-      const maxX = window.innerWidth - SPRITE_W - 8;
-      if(x < 8){ x = 8; dir = 1; }
-      if(x > maxX){ x = maxX; dir = -1; }
-      mascotEl.classList.toggle('face-left', dir === -1);
-
-      frameTimer += dt;
-      if(frameTimer > 140){
-        frameTimer = 0;
-        frame = (frame + 1) % FRAME_COUNT;
-        setFrame(frame);
+    /* ================= stats count-up ================= */
+    function animateCount(el) {
+      const target = parseInt(el.getAttribute('data-count'), 10);
+      if (reduceMotion) { el.textContent = target; return; }
+      const dur = 900;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - start) / dur);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(tick);
       }
-    } else {
-      setFrame(0);
+      requestAnimationFrame(tick);
     }
-    mascotEl.style.transform = 'translateX(' + x.toFixed(1) + 'px)';
-    requestAnimationFrame(tick);
-  }
+    const statObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { animateCount(entry.target); statObserver.unobserve(entry.target); }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('.stat-num').forEach(el => statObserver.observe(el));
 
-  if(reduceMotion){
-    mascotEl.style.transform = 'translateX(' + x + 'px)';
-    setFrame(0);
-  } else {
-    requestAnimationFrame(tick);
-  }
+    /* ================= interactive terminal console ================= */
+    const termOutput = document.getElementById('termOutput');
+    const termInput = document.getElementById('termInput');
 
-  let bubbleTimeout = null;
-  spriteEl.addEventListener('click', ()=>{
-    bubbleEl.textContent = QUIPS[Math.floor(Math.random()*QUIPS.length)];
-    bubbleEl.classList.add('show');
-    clearTimeout(bubbleTimeout);
-    bubbleTimeout = setTimeout(()=>bubbleEl.classList.remove('show'), 2400);
-    // little reaction: pause then pick a fresh direction
-    state = 'idle'; stateTimer = 500;
-  });
+    function termPrint(text, cls) {
+      const d = document.createElement('div');
+      d.className = 'line' + (cls ? ' ' + cls : '');
+      d.textContent = text;
+      termOutput.appendChild(d);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+    function termEcho(cmd) {
+      const d = document.createElement('div');
+      d.className = 'line prompt-echo';
+      d.textContent = cmd;
+      termOutput.appendChild(d);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
 
-  window.addEventListener('resize', ()=>{
-    const maxX = window.innerWidth - SPRITE_W - 8;
-    if(x > maxX) x = Math.max(8, maxX);
-  });
-})();
-</script>
+    function listMissions(filterCat) {
+      const list = filterCat ? PROJECTS.filter(p => p.category.toLowerCase() === filterCat.toLowerCase()) : PROJECTS;
+      if (!list.length) { termPrint(`no missions found for "${filterCat}"`, 'err'); return; }
+      list.forEach(p => termPrint(`  ${p.id}  [${STATUS_LABEL[p.status].toUpperCase()}]  ${p.name}`));
+    }
+
+    function findMission(query) {
+      query = query.toLowerCase().trim();
+      return PROJECTS.find(p => p.id.toLowerCase() === query || p.name.toLowerCase().includes(query));
+    }
+
+    const TERM_COMMANDS = {
+      help() {
+        termPrint("available commands:");
+        termPrint("  help                  show this list");
+        termPrint("  ls                    list all missions");
+        termPrint("  ls <category>         list missions in a category, e.g. ls nlp");
+        termPrint("  open <id|name>        open a mission dossier, e.g. open NP-01 / open volleyvision");
+        termPrint("  filter <category>     apply a category filter to the grid below");
+        termPrint("  categories            list available categories");
+        termPrint("  stats                 show mission counts");
+        termPrint("  about                 who is Nora");
+        termPrint("  contact               contact info");
+        termPrint("  clear                 clear this console");
+      },
+      ls(arg) { listMissions(arg); },
+      categories() { termPrint(categories.filter(c => c !== "ALL").join(', ')); },
+      open(arg) {
+        if (!arg) { termPrint("usage: open <mission id or name>", 'err'); return; }
+        const m = findMission(arg);
+        if (!m) { termPrint(`mission not found: "${arg}" — try 'ls'`, 'err'); return; }
+        termPrint(`opening dossier: ${m.name}...`, 'ok-line');
+        document.getElementById('missions').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+        setTimeout(() => openModal(m), reduceMotion ? 0 : 400);
+      },
+      filter(arg) {
+        if (!arg) { termPrint("usage: filter <category>  (or 'filter all')", 'err'); return; }
+        const match = categories.find(c => c.toLowerCase() === arg.toLowerCase());
+        if (!match) { termPrint(`unknown category: "${arg}" — try 'categories'`, 'err'); return; }
+        activeFilter = match; renderFilters(); renderGrid();
+        termPrint(`filter applied: ${match}`, 'ok-line');
+      },
+      stats() {
+        termPrint("TOTAL 10 · COMPLETED 7 · IN DEVELOPMENT 2 · ARCHIVED 1", 'accent-line');
+      },
+      about() {
+        termPrint("Nora Peñaloza Friqui — software engineer (NTT DATA) and applied ML/NLP researcher.");
+        termPrint("Based in Seville, Spain. B.Sc. Computer Engineering, Universidad de Sevilla.");
+        termPrint("Bachelor's thesis on AI for mental health, graded 10/10. Open to SWE / ML-NLP roles.");
+      },
+      contact() {
+        termPrint("email: npenfriq23@gmail.com");
+        termPrint("linkedin: linkedin.com/in/nora-peñaloza-friqui-79879b351");
+        termPrint("github: github.com/norapfr");
+      },
+      clear() { termOutput.innerHTML = ""; }
+    };
+
+    function runCommand(raw) {
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+      termEcho(trimmed);
+      const [cmdRaw, ...rest] = trimmed.split(/\s+/);
+      const cmd = cmdRaw.toLowerCase();
+      const arg = rest.join(' ');
+      if (TERM_COMMANDS[cmd]) { TERM_COMMANDS[cmd](arg); }
+      else { termPrint(`command not found: "${cmd}" — type 'help'`, 'err'); }
+    }
+
+    termPrint("field-log terminal v2.3 — type 'help' to see available commands", 'accent-line');
+    termInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { runCommand(termInput.value); termInput.value = ''; }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== termInput) { e.preventDefault(); termInput.focus(); }
+    });
+
+    renderFilters();
+    renderGrid();
+
+    /* ================= mascot: pixel field-bot that wanders the page ================= */
+    (function () {
+      const mascotEl = document.getElementById('mascot');
+      const spriteEl = document.getElementById('mascotSprite');
+      const bubbleEl = document.getElementById('mascotBubble');
+      if (!mascotEl) return;
+
+      const FRAME_W = 48;
+      const FRAME_COUNT = 4;
+      const SPRITE_W = 48;
+
+      let x = Math.max(20, window.innerWidth * 0.15);
+      let dir = 1;              // 1 = right, -1 = left
+      let speed = 0;            // px per frame, eased in/out
+      let state = 'idle';       // idle | walking
+      let stateTimer = 0;
+      let frame = 0;
+      let frameTimer = 0;
+      let lastTs = null;
+
+      const QUIPS = [
+        "9 missions logged.",
+        "F1 0.909 and counting.",
+        "Scanning for bugs...",
+        "Field log secure.",
+        "Coffee.exe not found.",
+        "Recompiling curls...",
+        "New badge unlocked: curious visitor.",
+        "Don't mind me, just patrolling."
+      ];
+
+      function setFrame(i) { spriteEl.style.backgroundPosition = (-i * FRAME_W) + 'px 0'; }
+
+      function pickNextState() {
+        if (state === 'idle') {
+          state = 'walking';
+          dir = Math.random() < 0.5 ? -1 : 1;
+          stateTimer = 1800 + Math.random() * 2600;
+        } else {
+          state = 'idle';
+          stateTimer = 1200 + Math.random() * 2200;
+        }
+      }
+      pickNextState();
+
+      function tick(ts) {
+        if (lastTs === null) lastTs = ts;
+        const dt = Math.min(48, ts - lastTs);
+        lastTs = ts;
+
+        stateTimer -= dt;
+        if (stateTimer <= 0) pickNextState();
+
+        const targetSpeed = state === 'walking' ? 0.052 : 0;
+        speed += (targetSpeed - speed) * 0.06;
+
+        if (Math.abs(speed) > 0.002) {
+          x += dir * speed * dt;
+          const maxX = window.innerWidth - SPRITE_W - 8;
+          if (x < 8) { x = 8; dir = 1; }
+          if (x > maxX) { x = maxX; dir = -1; }
+          mascotEl.classList.toggle('face-left', dir === -1);
+
+          frameTimer += dt;
+          if (frameTimer > 140) {
+            frameTimer = 0;
+            frame = (frame + 1) % FRAME_COUNT;
+            setFrame(frame);
+          }
+        } else {
+          setFrame(0);
+        }
+        mascotEl.style.transform = 'translateX(' + x.toFixed(1) + 'px)';
+        requestAnimationFrame(tick);
+      }
+
+      if (reduceMotion) {
+        mascotEl.style.transform = 'translateX(' + x + 'px)';
+        setFrame(0);
+      } else {
+        requestAnimationFrame(tick);
+      }
+
+      let bubbleTimeout = null;
+      spriteEl.addEventListener('click', () => {
+        bubbleEl.textContent = QUIPS[Math.floor(Math.random() * QUIPS.length)];
+        bubbleEl.classList.add('show');
+        clearTimeout(bubbleTimeout);
+        bubbleTimeout = setTimeout(() => bubbleEl.classList.remove('show'), 2400);
+        // little reaction: pause then pick a fresh direction
+        state = 'idle'; stateTimer = 500;
+      });
+
+      window.addEventListener('resize', () => {
+        const maxX = window.innerWidth - SPRITE_W - 8;
+        if (x > maxX) x = Math.max(8, maxX);
+      });
+    })();
+  </script>
 </body>
+
 </html>
